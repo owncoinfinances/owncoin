@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>🪙 OWNCOIN v6.1 — Gestor Financiero Personal</title>
+<title>🪙 OWNCOIN v6.2 — Gestor Financiero Personal</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -911,7 +911,7 @@ html[data-theme="dark"] .zoom-choices button.active{ color:var(--gold-300); back
 <!-- ===================== LANDING (choose DB source) ===================== -->
 <div id="landing">
   <div class="landing-card">
-    <div class="landing-mark">🪙 OWNCOIN <span style="color:var(--gold-600);">v6.1</span><span class="digits">Gestor financiero personal</span></div>
+    <div class="landing-mark">🪙 OWNCOIN <span style="color:var(--gold-600);">v6.2</span><span class="digits">Gestor financiero personal</span></div>
     <p class="landing-sub">Tus cuentas, tarjetas y presupuestos en un solo lugar, con respaldos en JSON y sincronización con tu GitHub privado.</p>
     <div class="landing-options">
       <div class="landing-opt" id="opt-new">
@@ -940,7 +940,7 @@ html[data-theme="dark"] .zoom-choices button.active{ color:var(--gold-300); back
   <div class="app-brand">
     <div class="mark">🪙</div>
     <div style="min-width:0;">
-      <div class="name">OWNCOIN <small>v6.1</small></div>
+      <div class="name">OWNCOIN <small>v6.2</small></div>
       <div class="tag" id="brand-filename">sin archivo</div>
       <div class="tag" id="autosave-indicator" style="color:#a9d6bb;">—</div>
     </div>
@@ -3382,17 +3382,22 @@ async function renderConfiguracion() {
         <div class="pill" style="margin-bottom:14px;">🔒 Bloqueo activo — método: ${cfg.method==='biometric'?'Huella / Face ID':'PIN numérico'}</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
           <button class="btn ghost" onclick="lockNow()">Bloquear ahora</button>
+          ${cfg.method==='pin' && bioAvailable ? `<button class="btn primary" onclick="handleSetupBiometric()">👆 Usar huella / Face ID</button>` : ''}
           ${cfg.method==='pin' ? `<button class="btn ghost" onclick="openPinSetupModal(true)">Cambiar PIN</button>` : ''}
           ${cfg.method==='biometric' && cfg.pinHash ? `<button class="btn ghost" onclick="openPinSetupModal(true)">Cambiar PIN de respaldo</button>` : ''}
           ${cfg.method==='biometric' && !cfg.pinHash ? `<button class="btn ghost" onclick="openPinSetupModal(false)">Agregar PIN de respaldo</button>` : ''}
+          ${cfg.method==='biometric' && bioAvailable ? `<button class="btn ghost" onclick="handleSetupBiometric()">Volver a registrar huella</button>` : ''}
+          ${cfg.method==='biometric' && cfg.pinHash ? `<button class="btn ghost" onclick="useOnlyPin()">Usar solo PIN</button>` : ''}
           <button class="btn danger" onclick="confirmDisableSecurity()">Desactivar bloqueo</button>
         </div>
+        ${cfg.method==='pin' && bioAvailable ? `<p class="hint" style="margin-top:10px;">Con huella, tu PIN actual se conserva como respaldo por si el sensor falla.</p>` : ''}
+        ${cfg.method==='pin' && !bioAvailable ? `<p class="hint" style="margin-top:10px;">${biometricUnavailableReason()}</p>` : ''}
       ` : `
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
           <button class="btn primary" onclick="openPinSetupModal(false)">🔢 Configurar PIN de 5 dígitos</button>
           ${bioAvailable ? `<button class="btn primary" onclick="handleSetupBiometric()">👆 Configurar huella / Face ID</button>` : ''}
         </div>
-        ${!bioAvailable ? `<p class="hint" style="margin-top:10px;">No detectamos un sensor de huella/Face ID disponible en este navegador — puedes usar el PIN numérico de todas formas.</p>` : ''}
+        ${!bioAvailable ? `<p class="hint" style="margin-top:10px;">${biometricUnavailableReason()}</p>` : ''}
       `}
     </div>
   `;
@@ -3440,6 +3445,20 @@ async function submitPinSetup() {
   await setupPin(pin);
   closeModal();
   showToast('PIN configurado.', 'success');
+  renderConfiguracion();
+}
+/* Por qué no se ofrece la huella en este navegador */
+function biometricUnavailableReason() {
+  if (!window.isSecureContext) return 'La huella solo funciona cuando abres OWNCOIN desde su dirección https (GitHub Pages), no desde un archivo descargado. Mientras tanto puedes usar el PIN.';
+  if (!isBiometricSupported()) return 'Este navegador no permite usar la huella. En Android usa Chrome; mientras tanto puedes usar el PIN.';
+  return 'No detectamos huella ni bloqueo de pantalla configurados en este dispositivo. Regístralos en los ajustes del teléfono y vuelve a abrir esta pantalla; mientras tanto puedes usar el PIN.';
+}
+async function useOnlyPin() {
+  const cfg = await getSecurityConfig();
+  if (!cfg.pinHash) return;
+  cfg.method = 'pin'; cfg.biometricCredentialId = null;
+  await saveSecurityConfig(cfg);
+  showToast('Ahora el bloqueo usa solo el PIN.', 'success');
   renderConfiguracion();
 }
 async function handleSetupBiometric() {
@@ -5228,7 +5247,7 @@ function tcmInitialView() { return (location.hash||'').toLowerCase()==='#tarjeta
    El mismo JSON sirve para descargarlo como respaldo y para guardarlo en
    un repositorio PRIVADO de GitHub mediante su API de contenidos.
    ===================================================================== */
-const OC_APP_VERSION = '6.1';
+const OC_APP_VERSION = '6.2';
 const BKP_FORMAT = 'owncoin-backup';
 
 /* ---------- JSON <-> base de datos ---------- */
