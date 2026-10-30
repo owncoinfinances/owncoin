@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>🪙 OWNCOIN v6.0 — Gestor Financiero Personal</title>
+<title>🪙 OWNCOIN v6.1 — Gestor Financiero Personal</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -876,6 +876,17 @@ html[data-theme="dark"] .zoom-choices button.active{ color:var(--gold-300); back
 #btn-sync[data-state="busy"] .sync-ic{ display:inline-block; animation:ghspin 1s linear infinite; }
 @keyframes ghspin{ to{ transform:rotate(360deg); } }
 .modal-foot.stack{ flex-wrap:wrap; }
+#toast-stack{ z-index:1200; }
+.power-btn{ display:inline-flex; align-items:center; justify-content:center; }
+.power-btn:hover, .power-btn:focus-visible{ background:rgba(240,116,104,.22); border-color:rgba(240,116,104,.6); color:#ffd9d4; }
+.closed-screen{ position:fixed; inset:0; z-index:950; display:flex; align-items:center; justify-content:center; padding:24px;
+  background:linear-gradient(160deg, var(--navy-900), var(--navy-700)); }
+.closed-card{ background:var(--card); border-radius:18px; padding:30px 26px; max-width:380px; width:100%; text-align:center; box-shadow:0 24px 60px -20px rgba(0,0,0,.6); }
+.closed-card h2{ font-family:var(--font-display); color:var(--heading); margin:10px 0 8px; font-size:20px; }
+.closed-card p{ color:var(--ink-soft); font-size:14px; line-height:1.5; margin:6px 0; }
+.closed-card .btn{ margin-top:14px; }
+.closed-ic{ width:58px; height:58px; margin:0 auto; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--gold-100); color:var(--gold-600); }
+.closed-ic svg{ width:28px; height:28px; }
 .landing-card{ max-width:860px; }
 @media(min-width:561px){ .landing-options{ grid-template-columns:repeat(3,1fr); } }
 @media(max-width:560px){ .modal-foot.stack{ flex-direction:column-reverse; align-items:stretch; } .modal-foot.stack .btn{ justify-content:center; } }
@@ -900,7 +911,7 @@ html[data-theme="dark"] .zoom-choices button.active{ color:var(--gold-300); back
 <!-- ===================== LANDING (choose DB source) ===================== -->
 <div id="landing">
   <div class="landing-card">
-    <div class="landing-mark">🪙 OWNCOIN <span style="color:var(--gold-600);">v6.0</span><span class="digits">Gestor financiero personal</span></div>
+    <div class="landing-mark">🪙 OWNCOIN <span style="color:var(--gold-600);">v6.1</span><span class="digits">Gestor financiero personal</span></div>
     <p class="landing-sub">Tus cuentas, tarjetas y presupuestos en un solo lugar, con respaldos en JSON y sincronización con tu GitHub privado.</p>
     <div class="landing-options">
       <div class="landing-opt" id="opt-new">
@@ -929,7 +940,7 @@ html[data-theme="dark"] .zoom-choices button.active{ color:var(--gold-300); back
   <div class="app-brand">
     <div class="mark">🪙</div>
     <div style="min-width:0;">
-      <div class="name">OWNCOIN <small>v6.0</small></div>
+      <div class="name">OWNCOIN <small>v6.1</small></div>
       <div class="tag" id="brand-filename">sin archivo</div>
       <div class="tag" id="autosave-indicator" style="color:#a9d6bb;">—</div>
     </div>
@@ -948,6 +959,7 @@ html[data-theme="dark"] .zoom-choices button.active{ color:var(--gold-300); back
     <button class="icon-btn" id="btn-theme-toggle" title="Cambiar a modo oscuro">🌙</button>
     <button class="icon-btn hidden" id="btn-sync" title="Sincronizar con GitHub" aria-label="Sincronizar con GitHub" onclick="ghsSync('manual')"><span class="sync-ic">⟳</span></button>
     <button class="icon-btn" id="btn-export-quick" title="Descargar respaldo .json" aria-label="Descargar respaldo .json">⬇ <span class="lbl">Respaldo</span></button>
+    <button class="icon-btn power-btn" id="btn-power" title="Guardar y bloquear / salir" aria-label="Guardar y bloquear o salir" onclick="powerOff()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 3v8"/><path d="M6.4 6.6a8 8 0 1 0 11.2 0"/></svg></button>
   </div>
 </div>
 
@@ -5216,7 +5228,7 @@ function tcmInitialView() { return (location.hash||'').toLowerCase()==='#tarjeta
    El mismo JSON sirve para descargarlo como respaldo y para guardarlo en
    un repositorio PRIVADO de GitHub mediante su API de contenidos.
    ===================================================================== */
-const OC_APP_VERSION = '6.0';
+const OC_APP_VERSION = '6.1';
 const BKP_FORMAT = 'owncoin-backup';
 
 /* ---------- JSON <-> base de datos ---------- */
@@ -5464,11 +5476,13 @@ async function ghsSync(mode = 'manual') {
     }
     if (!hasLocal || (remoteChanged && !localChanged)) {
       await ghsPull(meta);
+      // Con la app bloqueada, los datos se actualizan por detrás pero la pantalla sigue pidiendo PIN o huella
+      if (App.securityUnlocked === false) return;
       showToast(hasLocal ? 'Se cargaron los cambios hechos en otro dispositivo.' : `Datos descargados de GitHub: ${bkpTxnCount()} movimientos.`, 'success');
       if (App.__booted) bootApp(); else await proceedToApp();
       return;
     }
-    if (remoteChanged && localChanged) { ghsSetState({ conflict:true }); ghsOpenConflict(meta); return; }
+    if (remoteChanged && localChanged) { ghsSetState({ conflict:true }); if (App.securityUnlocked !== false && mode!=='auto') ghsOpenConflict(meta); return; }
     if (localChanged) {
       // Protección: si este dispositivo tiene muchos menos movimientos que la última versión, preguntar
       const prev = Number(st.syncedCount)||0, now = bkpTxnCount();
@@ -5693,6 +5707,84 @@ function pwaConfigCard() {
       : /^https?:$/.test(location.protocol) ? 'En Android: menú ⋮ de Chrome → “Instalar aplicación” o “Agregar a pantalla principal”.'
       : 'Disponible cuando abras OWNCOIN desde su dirección de GitHub Pages.'}</div>
     ${__installPrompt && !standalone ? '<button class="btn primary" onclick="pwaInstall()">Instalar OWNCOIN</button>' : ''}</div>`;
+}
+
+
+/* =====================================================================
+   BOTÓN DE APAGADO (⏻): guardar, sincronizar y bloquear o cerrar
+   ===================================================================== */
+const POWER_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 3v8"/><path d="M6.4 6.6a8 8 0 1 0 11.2 0"/></svg>';
+
+/* Guarda en el dispositivo y sube a GitHub lo pendiente. Devuelve 'ok' | 'pending' | 'local' */
+async function powerFlush() {
+  if (!App.db) return 'local';
+  clearTimeout(__autosaveTimer);
+  for (let i = 0; i < 20 && __autosaveInFlight; i++) await new Promise(r=>setTimeout(r, 100));
+  await persistCurrentDatabase();
+  if (!ghsReady()) return 'local';
+  clearTimeout(__ghsAutoTimer);
+  if (ghsState().dirty || !ghsState().sha) {
+    for (let i = 0; i < 50 && __ghsBusy; i++) await new Promise(r=>setTimeout(r, 100));
+    await ghsSync('auto');
+  }
+  const s = ghsState();
+  return (s.dirty || s.conflict || !s.sha) ? 'pending' : 'ok';
+}
+function powerResultText(r) {
+  return r==='ok' ? 'Todo quedó guardado y sincronizado con GitHub.'
+    : r==='pending' ? 'Tus datos quedaron guardados en este dispositivo; los cambios sin subir se enviarán a GitHub la próxima vez que abras OWNCOIN con internet.'
+    : 'Tus datos quedaron guardados en este dispositivo.';
+}
+async function powerOff() {
+  if (document.getElementById('power-btn-busy')) return;
+  openModal(`<div class="modal" id="power-btn-busy" style="max-width:340px;"><div class="modal-body" style="text-align:center;padding:26px 20px;">
+    <div style="font-size:26px;color:var(--gold-500);margin-bottom:8px;" aria-hidden="true"><span class="sync-ic" style="display:inline-block;animation:ghspin 1s linear infinite;">⟳</span></div>
+    <div style="font-weight:700;color:var(--heading);">Guardando antes de salir…</div>
+    <div class="hint">${ghsReady() ? 'Subiendo tus cambios a GitHub' : 'Guardando en este dispositivo'}</div></div></div>`);
+  document.getElementById('modal-root').onclick = null;
+  let result = 'local';
+  try { result = await powerFlush(); } catch (e) { console.error(e); result = ghsReady() ? 'pending' : 'local'; }
+  closeModal();
+  const cfg = await getSecurityConfig();
+  if (cfg.enabled) {
+    lockNow();
+    showToast('🔒 OWNCOIN bloqueado. ' + powerResultText(result), result==='pending' ? 'error' : 'success');
+    return;
+  }
+  openModal(`<div class="modal"><div class="modal-head"><h3>Salir de OWNCOIN</h3><button class="modal-close" onclick="closeModal()" aria-label="Cerrar">✕</button></div>
+    <div class="modal-body">
+      <p style="margin-top:0;">${powerResultText(result)}</p>
+      <p class="hint">Aún no tienes PIN ni huella. Configúralos y este botón dejará la app bloqueada, lista para pedirlos al volver. Sin bloqueo, cualquiera con tu dispositivo puede abrirla.</p>
+    </div>
+    <div class="modal-foot stack">
+      <button class="btn ghost" onclick="closeModal()">Seguir usando</button>
+      <button class="btn" onclick="closeModal(); powerShowClosed('${result}')">Cerrar sin bloqueo</button>
+      <button class="btn primary" onclick="closeModal(); switchView('configuracion'); openPinSetupModal(false);">Configurar PIN</button>
+    </div></div>`);
+}
+/* Pantalla de "cerrado" cuando no hay bloqueo configurado */
+function powerShowClosed(result) {
+  App.closedByUser = true;
+  document.getElementById('app-topbar').classList.add('hidden');
+  document.getElementById('app-shell').classList.add('hidden');
+  let el = document.getElementById('closed-screen');
+  if (!el) { el = document.createElement('div'); el.id = 'closed-screen'; document.body.appendChild(el); }
+  el.className = 'closed-screen';
+  el.innerHTML = `<div class="closed-card" role="dialog" aria-labelledby="closed-title">
+    <div class="closed-ic" aria-hidden="true">${POWER_SVG}</div>
+    <h2 id="closed-title">OWNCOIN cerrado</h2>
+    <p>${powerResultText(result)}</p>
+    <p class="hint">Ya puedes cerrar esta ventana.</p>
+    <button class="btn primary" onclick="powerReopen()">Abrir de nuevo</button></div>`;
+  el.classList.remove('hidden');
+  // En la app instalada se intenta cerrar la ventana; el navegador puede no permitirlo en una pestaña normal
+  if (window.matchMedia('(display-mode: standalone)').matches) setTimeout(()=>{ try { window.close(); } catch(e) {} }, 400);
+}
+function powerReopen() {
+  App.closedByUser = false;
+  const el = document.getElementById('closed-screen'); if (el) el.classList.add('hidden');
+  bootApp();
+  if (ghsReady()) ghsSync('open');
 }
 
 main();
