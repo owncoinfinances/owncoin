@@ -3,7 +3,7 @@
      sin conexión se usa la copia guardada.
    - Librerías y tipografías se guardan al primer uso y luego se sirven al instante.
    - Nunca se guarda nada de api.github.com: tus datos no pasan por esta caché. */
-const CACHE = 'owncoin-6.0';
+const CACHE = 'owncoin-6.0.1';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', (e) => {

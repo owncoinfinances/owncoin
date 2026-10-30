@@ -5402,6 +5402,13 @@ async function ghsDownloadText(ref) {
   if (!res.ok) throw ghsError('http', `No se pudo descargar el archivo (${res.status}).`);
   return await res.text();
 }
+/* Descarga exacta de una versión del archivo por el sha de su contenido (blob).
+   La API de contenidos solo acepta ramas o commits en ?ref=, por eso aquí se usa la de blobs. */
+async function ghsDownloadBlob(blobSha) {
+  const res = await ghsApi(`${ghsRepoPath()}/git/blobs/${encodeURIComponent(blobSha)}`, { accept:'application/vnd.github.raw+json' });
+  if (!res.ok) throw ghsError('http', `No se pudo descargar el archivo (${res.status}).`);
+  return await res.text();
+}
 async function ghsUploadText(text, sha) {
   const c = ghsCfg();
   const n = bkpTxnCount();
@@ -5429,7 +5436,7 @@ async function ghsPush(sha) {
   return newSha;
 }
 async function ghsPull(meta) {
-  const text = await ghsDownloadText(meta.sha);
+  const text = await ghsDownloadBlob(meta.sha);
   const db = bkpBuildDatabase(JSON.parse(text));
   await bkpAdopt(db, 'owncoin.json', { dirty:false });
   ghsSetState({ sha:meta.sha, dirty:false, dirtySince:null, syncedAt:Date.now(), syncedCount:bkpTxnCount(), conflict:false, error:null });
