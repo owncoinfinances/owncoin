@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>🪙 OWNCOIN v6.2 — Gestor Financiero Personal</title>
+<title>🪙 OWNCOIN v6.4 — Gestor Financiero Personal</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -891,6 +891,65 @@ html[data-theme="dark"] .zoom-choices button.active{ color:var(--gold-300); back
 @media(min-width:561px){ .landing-options{ grid-template-columns:repeat(3,1fr); } }
 @media(max-width:560px){ .modal-foot.stack{ flex-direction:column-reverse; align-items:stretch; } .modal-foot.stack .btn{ justify-content:center; } }
 @media (prefers-reduced-motion: reduce){ #btn-sync[data-state="busy"] .sync-ic{ animation:none; } }
+
+/* ---------- v6.4: selector visual de categorías ---------- */
+.catpick-btn{
+  width:100%; display:flex; align-items:center; gap:10px; text-align:left; cursor:pointer;
+  border:1.5px solid var(--line); border-radius:9px; padding:7px 10px; min-height:44px;
+  background:var(--input-bg); color:var(--ink); font-family:var(--font-body); font-size:14px;
+}
+.catpick-btn:hover{ border-color:var(--gold-300); }
+.catpick-btn:focus-visible{ outline:none; border-color:var(--gold-500); box-shadow:0 0 0 3px rgba(200,151,58,.18); }
+.catpick-ic{ width:30px; height:30px; flex-shrink:0; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; overflow:hidden; white-space:nowrap;
+  background:var(--gold-100); color:var(--gold-600); font-size:18px; }
+.catpick-txt{ display:flex; flex-direction:column; min-width:0; flex:1; line-height:1.2; }
+.catpick-txt .catpick-name{ font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.catpick-parent{ font-size:11px; color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.catpick-ph{ flex:1; color:var(--ink-soft); }
+.catpick-chev{ color:var(--ink-soft); font-size:12px; margin-left:auto; }
+.catpick-backdrop{ position:fixed; inset:0; z-index:400; display:none; align-items:center; justify-content:center; background:rgba(10,17,30,.55); padding:16px; }
+.catpick-backdrop.open{ display:flex; }
+.catpick-sheet{ background:var(--card); width:100%; max-width:480px; max-height:min(80vh, 640px); border-radius:16px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 24px 60px -20px rgba(0,0,0,.55); }
+@media(max-width:640px){
+  .catpick-backdrop{ align-items:flex-end; padding:0; }
+  .catpick-sheet{ max-width:100%; max-height:86vh; border-radius:16px 16px 0 0; padding-bottom:env(safe-area-inset-bottom, 0px); }
+}
+.catpick-top{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px 8px; }
+.catpick-top h3{ margin:0; font-family:var(--font-display); font-size:16px; color:var(--heading); }
+.catpick-search{ padding:0 16px 10px; border-bottom:1px solid var(--line); }
+.catpick-search input{ width:100%; border:1.5px solid var(--line); border-radius:9px; padding:10px 12px; font-size:14px; background:var(--input-bg); color:var(--ink); }
+.catpick-search input:focus{ outline:none; border-color:var(--gold-500); }
+.catpick-list{ overflow-y:auto; padding:6px 8px 12px; -webkit-overflow-scrolling:touch; }
+.catpick-grp{ font-size:10.5px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; color:var(--gold-600); padding:12px 8px 2px; }
+.catpick-head{ font-size:12px; font-weight:700; color:var(--navy-800); padding:10px 8px 4px; position:sticky; top:-6px; background:var(--card); z-index:1; }
+html[data-theme="dark"] .catpick-head{ color:var(--gold-300); }
+.catpick-head b{ color:var(--ink-soft); font-weight:700; margin-right:4px; }
+.catpick-item{ width:100%; display:flex; align-items:center; gap:10px; border:none; background:none; cursor:pointer; text-align:left;
+  padding:8px; border-radius:9px; color:var(--ink); font-family:var(--font-body); font-size:14px; min-height:44px; }
+.catpick-item:hover, .catpick-item:focus-visible{ background:var(--hover-bg); outline:none; }
+.catpick-item.selected{ background:var(--gold-100); }
+html[data-theme="dark"] .catpick-item.selected{ background:rgba(200,151,58,.18); }
+.catpick-code{ min-width:26px; font-weight:800; color:var(--gold-600); font-variant-numeric:tabular-nums; }
+.catpick-item .catpick-name{ flex:1; }
+.catpick-check{ color:var(--ok); font-weight:800; }
+/* Categorías: uso y tipo de grupo */
+.cat-use{ font-size:11.5px; color:var(--ink-soft); margin-top:2px; }
+.cat-view-btn{ margin-top:5px; border:1px solid var(--gold-300); background:var(--gold-100); color:var(--navy-800); border-radius:20px; font-size:11.5px; font-weight:700; padding:3px 10px; cursor:pointer; font-family:var(--font-body); }
+.cat-view-btn:hover{ background:var(--gold-300); }
+html[data-theme="dark"] .cat-view-btn{ background:transparent; color:var(--gold-300); }
+.cat-parent-head .name{ flex-wrap:wrap; row-gap:0; }
+.cat-parent-meta{ display:block; flex-basis:100%; padding-left:22px; font-family:var(--font-body); font-size:11.5px; font-weight:500; color:var(--ink-soft); margin-top:3px; }
+.cat-grp-chip{ font-size:10px; font-weight:700; padding:1px 7px; border-radius:20px; margin-right:6px; background:var(--bg); color:var(--ink-soft); }
+.cat-grp-chip.exp{ background:var(--danger-bg, #fbe9e7); color:var(--danger); }
+.cat-grp-chip.inc{ background:var(--ok-bg); color:var(--ok); }
+/* Aviso compacto "Guardando antes de salir" */
+.power-busy{ position:fixed; inset:0; z-index:1100; display:none; align-items:center; justify-content:center; background:rgba(10,17,30,.45); padding:24px; }
+.power-busy.show{ display:flex; }
+.power-busy-card{ display:flex; align-items:center; gap:14px; background:var(--card); border-radius:14px; padding:16px 20px; max-width:320px; width:auto; box-shadow:0 18px 40px -16px rgba(0,0,0,.5); }
+.power-busy-spin{ font-size:24px; color:var(--gold-500); display:inline-block; animation:ghspin 1s linear infinite; }
+@media (prefers-reduced-motion: reduce){ .power-busy-spin{ animation:none; } }
+.power-busy-title{ font-weight:700; color:var(--heading); font-size:14px; }
+.power-busy-sub{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
 </style>
 </head>
 <script>
@@ -1554,13 +1613,12 @@ function getNetWorth() {
   accounts.forEach(a=>{ total += (balances[a.accountsTableID]||0); });
   return total;
 }
-function getParentCategories() {
-  return dbAll(`SELECT * FROM PARENTCATEGORYTABLE WHERE parentCategoryTableID > 1 ORDER BY parentCategoryName`);
-}
+function getParentCategories() { return ocSelectableParents(); }
 function getChildCategories(parentId=null) {
-  let sql = `SELECT c.*, p.parentCategoryName FROM CHILDCATEGORYTABLE c
+  const G = tciGroupIds();
+  let sql = `SELECT c.*, p.parentCategoryName, p.categoryGroupID grp FROM CHILDCATEGORYTABLE c
              JOIN PARENTCATEGORYTABLE p ON p.parentCategoryTableID = c.parentCategoryID
-             WHERE c.parentCategoryID > 1`;
+             WHERE p.categoryGroupID IN (${Number(G.exp)},${Number(G.inc)})`;
   const params = [];
   if (parentId !== null) { sql += ' AND c.parentCategoryID = ?'; params.push(parentId); }
   sql += ' ORDER BY c.childCategoryName';
@@ -1658,10 +1716,7 @@ function saveChildCategory(form) {
       [name, budgetScaled, budgetScaled>0?1:0, parentId, iconStr]);
   }
 }
-function deleteChildCategory(id) {
-  dbRun(`UPDATE TRANSACTIONSTABLE SET categoryID=2 WHERE categoryID=?`, [id]);
-  dbRun(`DELETE FROM CHILDCATEGORYTABLE WHERE categoryTableID=?`, [id]);
-}
+function deleteChildCategory(id) { ocConfirmDeleteCategory(id); }
 function getCategoryMonthSpend(categoryId, ymKey) {
   const r = dbOne(`SELECT COALESCE(SUM(amount),0) as s FROM TRANSACTIONSTABLE
     WHERE categoryID=? AND deletedTransaction=6 AND substr(date,1,7)=? AND amount < 0`, [categoryId, ymKey]);
@@ -1752,20 +1807,20 @@ function saveTransferTransaction(form) {
       let out = legs.find(l=>l.amount<0), inn = legs.find(l=>l.amount>=0 && (!out || l.id!==out.id));
       const grp = prev.transferGroupID || Date.now();
       if (out) dbRun(`UPDATE TRANSACTIONSTABLE SET amount=?, date=?, accountID=?, accountPairID=?, notes=?, itemID=?, transferGroupID=? WHERE transactionsTableID=?`, [-amountScaled, dateStr, form.fromAccountId, form.toAccountId, form.notes||'', itemId, grp, out.id]);
-      else insertTransaction({ amount:-amountScaled, currency:form.currency, date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:1, accountId:form.fromAccountId, accountPairId:form.toAccountId, notes:form.notes, transferGroupId:grp, itemId });
+      else insertTransaction({ amount:-amountScaled, currency:form.currency, date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:ocTransferCategoryId(), accountId:form.fromAccountId, accountPairId:form.toAccountId, notes:form.notes, transferGroupId:grp, itemId });
       if (inn) dbRun(`UPDATE TRANSACTIONSTABLE SET amount=?, date=?, accountID=?, accountPairID=?, notes=?, itemID=?, transferGroupID=? WHERE transactionsTableID=?`, [amountScaled, dateStr, form.toAccountId, form.fromAccountId, form.notes||'', itemId, grp, inn.id]);
-      else insertTransaction({ amount: amountScaled, currency:form.currency, date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:1, accountId:form.toAccountId, accountPairId:form.fromAccountId, notes:form.notes, transferGroupId:grp, itemId });
+      else insertTransaction({ amount: amountScaled, currency:form.currency, date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:ocTransferCategoryId(), accountId:form.toAccountId, accountPairId:form.fromAccountId, notes:form.notes, transferGroupId:grp, itemId });
     } else {
       // un gasto o ingreso convertido en transferencia: esa fila pasa a ser la salida y se crea la entrada
       const grp = Date.now();
-      dbRun(`UPDATE TRANSACTIONSTABLE SET amount=?, date=?, transactionTypeID=?, categoryID=1, accountID=?, accountPairID=?, notes=?, itemID=?, transferGroupID=?, newSplitTransactionID=0 WHERE transactionsTableID=?`,
+      dbRun(`UPDATE TRANSACTIONSTABLE SET amount=?, date=?, transactionTypeID=?, categoryID=${Number(ocTransferCategoryId())}, accountID=?, accountPairID=?, notes=?, itemID=?, transferGroupID=?, newSplitTransactionID=0 WHERE transactionsTableID=?`,
         [-amountScaled, dateStr, TXN_TYPE.TRANSFERENCIA, form.fromAccountId, form.toAccountId, form.notes||'', itemId, grp, form.id]);
-      insertTransaction({ amount: amountScaled, currency:form.currency, date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:1, accountId:form.toAccountId, accountPairId:form.fromAccountId, notes:form.notes, transferGroupId:grp, itemId });
+      insertTransaction({ amount: amountScaled, currency:form.currency, date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:ocTransferCategoryId(), accountId:form.toAccountId, accountPairId:form.fromAccountId, notes:form.notes, transferGroupId:grp, itemId });
     }
   } else {
     const grp = Date.now();
-    insertTransaction({ amount:-amountScaled, currency:form.currency, date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:1, accountId:form.fromAccountId, accountPairId:form.toAccountId, notes:form.notes, transferGroupId:grp, itemId });
-    insertTransaction({ amount: amountScaled, currency:form.currency, date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:1, accountId:form.toAccountId, accountPairId:form.fromAccountId, notes:form.notes, transferGroupId:grp, itemId });
+    insertTransaction({ amount:-amountScaled, currency:form.currency, date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:ocTransferCategoryId(), accountId:form.fromAccountId, accountPairId:form.toAccountId, notes:form.notes, transferGroupId:grp, itemId });
+    insertTransaction({ amount: amountScaled, currency:form.currency, date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:ocTransferCategoryId(), accountId:form.toAccountId, accountPairId:form.fromAccountId, notes:form.notes, transferGroupId:grp, itemId });
   }
 }
 
@@ -2608,10 +2663,7 @@ function renderTransacciones() {
         <option value="">Todas las cuentas</option>
         ${accounts.map(a=>`<option value="${a.accountsTableID}" ${App.txnFilters.account==a.accountsTableID?'selected':''}>${accountDisplayLabel(a)}</option>`).join('')}
       </select>
-      <select id="filt-category">
-        <option value="">Todas las categorías</option>
-        ${categories.map(c=>`<option value="${c.categoryTableID}" ${App.txnFilters.category==c.categoryTableID?'selected':''}>${c.childCategoryName}</option>`).join('')}
-      </select>
+      <div class="filt-cat">${catPickerField('filt-category', App.txnFilters.category, { kind:'all', empty:'Todas las categorías', placeholder:'Todas las categorías' })}</div>
       <select id="filt-type">
         <option value="">Todos los tipos</option>
         <option value="3" ${App.txnFilters.type=='3'?'selected':''}>Gasto</option>
@@ -2938,7 +2990,7 @@ function renderTxnFormBody() {
       <div class="field"><label>Moneda</label><input id="f-txn-currency" value="${src?(src.transactionCurrency||'USD'):'USD'}" maxlength="4"></div>
       ${canSplit ? '' : `
       <div class="field amount"><label>Monto</label><input id="f-txn-amount" type="number" step="0.01" value="${src?Math.abs(src.amount/SCALE).toFixed(2):''}"></div>
-      <div class="field"><label>Categoría</label><select id="f-txn-category">${catOpts}</select></div>`}
+      <div class="field"><label>Categoría</label>${catPickerField('f-txn-category', src ? src.categoryID : '', { kind: type==='ingreso' ? 'inc' : 'exp' })}</div>`}
       <div class="field span-2"><label for="f-txn-notes">Notas</label><textarea id="f-txn-notes" rows="3" oninput="autoGrow(this)" placeholder="Describe el movimiento (opcional)">${src?escapeHtml(src.notes||''):''}</textarea></div>
     </div>
     ${canSplit ? `
@@ -2959,10 +3011,7 @@ function renderSplitRows() {
   const wrap = document.getElementById('split-rows');
   wrap.innerHTML = window.__txnCtx.splits.map((s,i)=>`
     <div class="split-row">
-      <select onchange="window.__txnCtx.splits[${i}].categoryId=this.value">
-        <option value="">Categoría…</option>
-        ${categories.map(c=>`<option value="${c.categoryTableID}" ${s.categoryId==c.categoryTableID?'selected':''}>${c.parentCategoryName} › ${c.childCategoryName}</option>`).join('')}
-      </select>
+      <div class="split-cat">${catPickerField('split-cat-'+i, s.categoryId, { kind: window.__txnCtx.type==='ingreso' ? 'inc' : 'exp', placeholder:'Categoría…', onchange:`window.__txnCtx.splits[${i}].categoryId=value` })}</div>
       <input type="number" step="0.01" placeholder="0.00" value="${s.amount}" oninput="window.__txnCtx.splits[${i}].amount=this.value; updateSplitTotal();">
       <button class="icon-btn mini delete" onclick="removeSplitRow(${i})">✕</button>
     </div>`).join('');
@@ -2998,7 +3047,7 @@ function submitTxnForm() {
       });
     } else if (!ctx.t && document.getElementById('split-rows')) {
       if (!itemName) throw new Error('Asigna un nombre a la transacción.');
-      const valid = ctx.splits.filter(s=>s.categoryId && parseFloat(s.amount)>0);
+      const valid = ctx.splits.filter(s=>s.categoryId!=='' && s.categoryId!=null && parseFloat(s.amount)>0);
       if (!valid.length) throw new Error('Agrega al menos una línea de split con categoría y monto.');
       saveSplitTransaction({
         type, accountId: parseInt(document.getElementById('f-txn-account').value,10),
@@ -3017,7 +3066,7 @@ function submitTxnForm() {
         id: ctx.t ? ctx.t.transactionsTableID : null,
         keepSign: !!(ctx.t && ctx.t.transactionTypeID === (type==='gasto'?TXN_TYPE.GASTO:TXN_TYPE.INGRESO) && ((type==='gasto') === (ctx.t.amount > 0))),
         type, accountId: parseInt(document.getElementById('f-txn-account').value,10),
-        categoryId: parseInt(document.getElementById('f-txn-category').value,10),
+        categoryId: (()=>{ const v = document.getElementById('f-txn-category').value; if (v==='') throw new Error('Elige una categoría.'); return parseInt(v,10); })(),
         amount, date: document.getElementById('f-txn-date').value,
         time: document.getElementById('f-txn-time').value,
         notes: document.getElementById('f-txn-notes').value,
@@ -3045,14 +3094,19 @@ function renderCategorias() {
     el.innerHTML = `<div class="empty-state"><div class="glyph">◫</div><p>No hay categorías todavía.</p></div>`;
     return;
   }
-  el.innerHTML = parents.map(p=>{
+  const usage = ocCategoryUsage();
+  const G = tciGroupIds();
+  el.innerHTML = `<p class="hint" style="margin:0 0 12px;">Toca “ver movimientos” en cualquier categoría para revisar qué registros tiene.</p>` + parents.map(p=>{
     const children = getChildCategories(p.parentCategoryTableID);
+    const pn = children.reduce((s,c)=>s + ((usage[c.categoryTableID]||{}).n||0), 0);
+    const isInc = p.categoryGroupID === G.inc;
     return `
     <div class="cat-parent">
       <div class="cat-parent-head" onclick="toggleCatParent(${p.parentCategoryTableID})">
-        <div class="name"><span class="caret" id="caret-${p.parentCategoryTableID}">▶</span> ${p.parentCategoryName}</div>
+        <div class="name"><span class="caret" id="caret-${p.parentCategoryTableID}">▶</span> ${escapeHtml(p.parentCategoryName)}<span class="cat-parent-meta"><span class="cat-grp-chip ${isInc?'inc':'exp'}">${isInc?'Ingresos':'Gastos'}</span>${pn} movimiento${pn===1?'':'s'}</span></div>
         <div class="row-actions" style="opacity:.6;" onclick="event.stopPropagation()">
-          <button class="icon-btn mini edit" title="Renombrar" onclick="renamePrompt(${p.parentCategoryTableID})">✎</button>
+          <button class="icon-btn mini edit" title="Renombrar" aria-label="Renombrar grupo" onclick="renamePrompt(${p.parentCategoryTableID})">✎</button>
+          ${children.length ? '' : `<button class="icon-btn mini delete" title="Eliminar grupo vacío" aria-label="Eliminar grupo vacío" onclick="ocConfirmDeleteParent(${p.parentCategoryTableID})">✕</button>`}
         </div>
       </div>
       <div class="cat-children" id="children-${p.parentCategoryTableID}">
@@ -3064,7 +3118,9 @@ function renderCategorias() {
           return `<div class="cat-child-row">
             <div class="cat-icon-badge"><span class="msi">${getCategoryIconLigature(c)}</span></div>
             <div style="flex:1;">
-              <div>${c.childCategoryName}</div>
+              <div>${escapeHtml(c.childCategoryName)}</div>
+              <div class="cat-use">${(usage[c.categoryTableID]||{}).n ? `${usage[c.categoryTableID].n} movimiento${usage[c.categoryTableID].n===1?'':'s'} · ${fmtMoney(Math.round(usage[c.categoryTableID].total*SCALE),'USD')}</div>
+              <button type="button" class="cat-view-btn" onclick="ocViewCategory(${c.categoryTableID})">Ver movimientos ›</button>` : 'Sin movimientos</div>'}
               ${budget>0 ? `
                 <div class="budget-bar-track"><div class="budget-bar-fill ${barClass}" style="width:${pct}%"></div></div>
                 <div class="faint" style="font-size:11px;margin-top:3px;">$${spent.toFixed(2)} de $${budget.toFixed(2)} este mes</div>
@@ -3072,7 +3128,7 @@ function renderCategorias() {
             </div>
             <div class="row-actions">
               <button class="icon-btn mini edit" title="Editar" onclick="openCategoryModal(${c.categoryTableID})">✎</button>
-              <button class="icon-btn mini delete" title="Eliminar" onclick="confirmDeleteCategory(${c.categoryTableID})">✕</button>
+              <button class="icon-btn mini delete" title="Eliminar" aria-label="Eliminar categoría" onclick="ocConfirmDeleteCategory(${c.categoryTableID})">✕</button>
             </div>
           </div>`;
         }).join('') : `<p class="faint" style="padding:10px 12px;">Sin subcategorías.</p>`}
@@ -3108,7 +3164,7 @@ function openCategoryModal(id=null) {
         <div class="form-grid">
           <div class="field span-2"><label>Nombre</label><input id="f-cat-name" value="${c?c.childCategoryName:''}" placeholder="Ej. Supermercado"></div>
           <div class="field"><label>Grupo (categoría padre)</label>
-            <select id="f-cat-parent">${parents.map(p=>`<option value="${p.parentCategoryTableID}" ${c&&c.parentCategoryID===p.parentCategoryTableID?'selected':''}>${p.parentCategoryName}</option>`).join('')}</select>
+            <select id="f-cat-parent">${parents.map(p=>`<option value="${p.parentCategoryTableID}" ${c&&c.parentCategoryID===p.parentCategoryTableID?'selected':''}>${escapeHtml(p.parentCategoryName)} · ${p.categoryGroupID===tciGroupIds().inc?'Ingresos':'Gastos'}</option>`).join('')}</select>
           </div>
           <div class="field amount"><label>Presupuesto mensual (opcional)</label><input id="f-cat-budget" type="number" step="0.01" value="${c&&c.budgetAmount?(c.budgetAmount/SCALE).toFixed(2):''}"></div>
         </div>
@@ -3511,6 +3567,7 @@ function confirmClearAutosave() {
    ===================================================================== */
 function bootApp() {
   if (typeof ghsPaintStatus === 'function') setTimeout(ghsPaintStatus, 0);
+  ocCategoryMaintenance();
   document.getElementById('landing').classList.add('hidden');
   document.getElementById('app-topbar').classList.remove('hidden');
   document.getElementById('app-shell').classList.remove('hidden');
@@ -3722,15 +3779,31 @@ function tciLastBatch() {
 
 /* ---------- catálogos de OWNCOIN ---------- */
 function tciCategories() {
-  return dbAll(`SELECT c.categoryTableID id, c.childCategoryName name, p.parentCategoryName parent, p.categoryGroupID grp
-    FROM CHILDCATEGORYTABLE c JOIN PARENTCATEGORYTABLE p ON p.parentCategoryTableID = c.parentCategoryID
-    WHERE c.parentCategoryID > 1 ORDER BY p.parentCategoryName, c.childCategoryName`);
+  return ocSelectableCats('all').map(c=>({ id:c.categoryTableID, name:c.childCategoryName, parent:c.parentCategoryName, grp:c.grp }));
 }
+/* Qué grupo de categorías es Gastos y cuál Ingresos. No se asume un número fijo:
+   en bases venidas de Bluecoins Gastos es el grupo 3 (y el 1 es Transferir),
+   en bases creadas por OWNCOIN Gastos es el 1. Se identifica por el nombre. */
+function tciGroupIds() {
+  let rows = [];
+  try { rows = dbAll(`SELECT categoryGroupTableID id, categoryGroupName n FROM CATEGORYGROUPTABLE`); } catch(e) {}
+  const find = re => { const r = rows.find(x=>re.test(String(x.n||''))); return r ? r.id : null; };
+  const exp = find(/gasto|egreso|expense/i), inc = find(/ingreso|income/i);
+  return { exp: exp!=null ? exp : 1, inc: inc!=null ? inc : 2, transfer: find(/transfer/i) };
+}
+function tciIsExpenseCat(id) {
+  const r = dbOne(`SELECT p.categoryGroupID g FROM CHILDCATEGORYTABLE c JOIN PARENTCATEGORYTABLE p ON p.parentCategoryTableID=c.parentCategoryID WHERE c.categoryTableID=?`, [Number(id)]);
+  return !!r && r.g === tciGroupIds().exp;
+}
+/* Categoría de gastos para lo que aún no se clasifica: "(Sin Categoría)" si existe, si no "Otros"; o ninguna */
 function tciUncategorizedId(cats) {
-  const c = cats.find(x=>/sin categor/i.test(x.name)) || cats.find(x=>x.grp===1);
-  return c ? c.id : 2;
+  const E = tciGroupIds().exp;
+  const c = cats.find(x=>x.grp===E && /sin categor/i.test(x.name)) || cats.find(x=>x.grp===E && /^\s*otros/i.test(x.name));
+  return c ? c.id : null;
 }
 function tciCategoryOptions(cats, selected, grp) {
+  const G = tciGroupIds();
+  if (grp==='exp') grp = G.exp; else if (grp==='inc') grp = G.inc;
   const list = cats.filter(c=>c.grp===grp);
   const byParent = {};
   list.forEach(c=>{ (byParent[c.parent] = byParent[c.parent] || []).push(c); });
@@ -3826,18 +3899,19 @@ function tciStart(data, fileName) {
     if (!merchantGroups[key]) merchantGroups[key] = { key, sample:tciItemName(t.desc), count:0, total:0 };
     merchantGroups[key].count++; merchantGroups[key].total += Number(t.amount)||0;
   });
-  const catIds = new Set(cats.map(c=>String(c.id)));
+  const catIds = new Set(cats.filter(c=>c.grp===tciGroupIds().exp).map(c=>String(c.id)));
+  const incIds = new Set(cats.filter(c=>c.grp===tciGroupIds().inc).map(c=>String(c.id)));
   const uncategorized = tciUncategorizedId(cats);
   const merchantMap = {}, merchantSource = {};
   Object.values(merchantGroups).forEach(g=>{
     if (savedRules[g.key] && catIds.has(String(savedRules[g.key]))) { merchantMap[g.key] = String(savedRules[g.key]); merchantSource[g.key]='rule'; }
     else if (learned[g.key] && catIds.has(String(learned[g.key]))) { merchantMap[g.key] = String(learned[g.key]); merchantSource[g.key]='history'; }
-    else { merchantMap[g.key] = String(uncategorized); merchantSource[g.key]=''; }
+    else { merchantMap[g.key] = uncategorized!=null ? String(uncategorized) : ''; merchantSource[g.key]=''; }
   });
 
-  const incomeCats = cats.filter(c=>c.grp===2);
+  const incomeCats = cats.filter(c=>c.grp===tciGroupIds().inc);
   const savedIncomeCat = tciGetConfig('incomeCategory', null);
-  const incomeCategory = String(savedIncomeCat && catIds.has(String(savedIncomeCat)) ? savedIncomeCat
+  const incomeCategory = String(savedIncomeCat && incIds.has(String(savedIncomeCat)) ? savedIncomeCat
     : ((incomeCats.find(c=>/cash ?back|reembolso|devoluc/i.test(c.name)) || incomeCats.find(c=>/otro/i.test(c.name)) || incomeCats[0] || {id:uncategorized}).id));
 
   window.__tci = {
@@ -3867,7 +3941,10 @@ function tciSourceKey(desc) {
 function tciLearnFromHistory() {
   const rows = dbAll(`SELECT i.itemName, tr.notes, tr.categoryID FROM TRANSACTIONSTABLE tr
     LEFT JOIN ITEMTABLE i ON i.itemTableID = tr.itemID
-    WHERE tr.deletedTransaction=6 AND tr.transactionTypeID=3 AND tr.categoryID > 0`);
+    JOIN CHILDCATEGORYTABLE cc ON cc.categoryTableID = tr.categoryID
+    JOIN PARENTCATEGORYTABLE pc ON pc.parentCategoryTableID = cc.parentCategoryID
+    WHERE tr.deletedTransaction=6 AND tr.transactionTypeID=3 AND pc.categoryGroupID = ${Number(tciGroupIds().exp)}
+      AND cc.childCategoryName NOT LIKE '%Sin Categor%' AND TRIM(cc.childCategoryName) NOT LIKE 'Otros%'`);
   const counts = {};
   rows.forEach(r=>{
     [r.itemName, r.notes].forEach(txt=>{
@@ -4042,7 +4119,7 @@ function tciStepSources() {
   return `<p class="tci-intro">Cada abono se registra como una transferencia desde la cuenta que lo pagó, así bajan juntos el saldo del banco y la deuda de la tarjeta. Agrupé los abonos por la cuenta que menciona su descripción. Usa “ingreso” para cashback o cuando otra persona pagó.</p>
     <div class="tci-box">${rows}</div>
     <div class="tci-inline"><div class="field"><label>Categoría para abonos registrados como ingreso</label>
-      <select onchange="window.__tci.incomeCategory=this.value">${tciCategoryOptions(S.cats, S.incomeCategory, 2)}</select></div></div>`;
+      ${catPickerField('tci-inc', S.incomeCategory, { kind:'inc', onchange:'window.__tci.incomeCategory=value' })}</div></div>`;
 }
 function tciSetSource(i, v) { const S = window.__tci; S.sourceMap[S.sourceGroups[i].key] = v; tciRerender(); }
 
@@ -4054,7 +4131,7 @@ function tciStepMerchants() {
     return `<div class="tci-row ${src?'learned':''}">
       <div><div class="tci-name">${escapeHtml(g.sample)}</div>
       <div class="tci-meta">${g.count} cargo${g.count===1?'':'s'} · ${tciMoney(g.total)}${src==='rule'?' · regla guardada':src==='history'?' · según tu historial':''}</div></div>
-      <select onchange="tciSetMerchant(${i}, this.value)">${tciCategoryOptions(S.cats, S.merchantMap[g.key], 1)}</select></div>`;
+      ${catPickerField('tci-m-'+i, S.merchantMap[g.key], { kind:'exp', placeholder:'Elige (si no, “Otros”)', onchange:`tciSetMerchant(${i}, value)` })}</div>`;
   }).join('');
   return `<p class="tci-intro">TC-CONTROL no guarda categorías, así que se asignan por comercio. ${learnedN?`${learnedN} de ${S.merchantGroups.length} ya vienen sugeridos (borde verde) a partir de tus movimientos anteriores.`:''} Lo que elijas queda como regla para las próximas importaciones.</p>
     <div class="tci-box">${rows}</div>`;
@@ -4168,6 +4245,7 @@ async function tciRunImport() {
   let grpSeq = Math.max(Date.now(), maxGrp + 1);
   const payItem = getOrCreateItemIdSilent('Pago de tarjeta');
 
+  window.__tciOtros = null;
   App.db.run('BEGIN');
   try {
     tciEnsureTables();
@@ -4189,6 +4267,7 @@ async function tciRunImport() {
       const scaled = Math.round(it.amount*SCALE);
       const ids = [];
       if (it.kind==='charge') {
+        if (it.mode!=='refund' && (it.categoryId==='' || it.categoryId==null)) it.categoryId = (window.__tciOtros = window.__tciOtros || ocEnsureOtrosExpense());
         const itemId = getOrCreateItemIdSilent(tciItemName(it.tc.desc));
         ids.push(insertTransaction({ amount: it.mode==='refund' ? scaled : -scaled, currency:'USD', date:dateStr,
           typeId: it.mode==='refund' ? TXN_TYPE.INGRESO : TXN_TYPE.GASTO,
@@ -4199,8 +4278,8 @@ async function tciRunImport() {
       } else {
         const grp = grpSeq++;
         const from = Number(it.fromAccountId);
-        ids.push(insertTransaction({ amount:-scaled, currency:'USD', date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:1, accountId:from, accountPairId:accountId, notes:it.tc.desc||'', transferGroupId:grp, itemId:payItem }));
-        ids.push(insertTransaction({ amount: scaled, currency:'USD', date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:1, accountId, accountPairId:from, notes:it.tc.desc||'', transferGroupId:grp, itemId:payItem }));
+        ids.push(insertTransaction({ amount:-scaled, currency:'USD', date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:ocTransferCategoryId(), accountId:from, accountPairId:accountId, notes:it.tc.desc||'', transferGroupId:grp, itemId:payItem }));
+        ids.push(insertTransaction({ amount: scaled, currency:'USD', date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:ocTransferCategoryId(), accountId, accountPairId:from, notes:it.tc.desc||'', transferGroupId:grp, itemId:payItem }));
       }
       App.db.run(`INSERT OR REPLACE INTO OC_TC_LINK (linkKey, batchId, kind, tcCardId, txnIds, tcMonth, tcCode, cashback, importedAt) VALUES (?,?,?,?,?,?,?,?,?)`,
         [it.key, batchId, it.kind, it.card.id, ids.join(','), it.tc.month||'', it.tc.tcCode||'', Number(it.tc.cashback)||0, stamp]);
@@ -4568,7 +4647,7 @@ function tcmRenderEstado(cards) {
     return `<div class="section-heading"><h3>${l}</h3></div>` + items.map(x=>tcmCardBlock(x.c, x.s)).join('');
   }).join('');
 
-  return tcmStmtBar('Cada cargo cae en el estado de cuenta según el día de corte de su tarjeta; puedes cambiarlo al registrarlo.') + `
+  return tcmStmtBar('Cada cargo cae en el estado de cuenta según el día de corte de su tarjeta; puedes cambiarlo al registrarlo.') + tcmCategoryBanner() + `
     <div class="grid cols-4 tcm-kpis">
       <div class="card stat"><div class="label">Gasto del estado</div><div class="value">${tcmMoney(tg)}</div><div class="foot">${stats.reduce((a,x)=>a+x.s.charges.length,0)} cargos</div></div>
       <div class="card stat"><div class="label">Pagado</div><div class="value pos">${tcmMoney(tp)}</div><div class="foot">${p}% cancelado</div></div>
@@ -4678,7 +4757,8 @@ function tcmOpenCharge(id, accountId) {
   const stmt = (t && t.stmt) || tcmChargeStmt(day, card.cutDay);
   let personas = []; try { personas = t && t.personas ? JSON.parse(t.personas) : []; } catch(e) {}
   const cats = tciCategories();
-  const catId = t ? t.categoryID : tciUncategorizedId(cats);
+  // si el cargo tenía una categoría que no es de Gastos (p. ej. Transferir), se propone Sin Categoría
+  const catId = t && tciIsExpenseCat(t.categoryID) && !/sin categor/i.test((ocCatById(t.categoryID)||{}).childCategoryName||'') ? t.categoryID : null;
   const people = tcmPeople();
   window.__tcmF = { kind:'charge', id, catTouched: !!t, cbTouched: !!(t && t.cashback!=null), stmtTouched: !!(t && t.stmt) };
   openModal(`<div class="modal">
@@ -4690,7 +4770,7 @@ function tcmOpenCharge(id, accountId) {
       <div class="field span-2"><label for="tcf-name">Descripción</label><input id="tcf-name" list="tcf-names" value="${escapeHtml(t?t.itemName||'':'')}" oninput="tcmChargeRecalc('name')" placeholder="Comercio o concepto" autocomplete="off">
         <datalist id="tcf-names">${getItemNamesRanked().slice(0,300).map(n=>`<option value="${escapeHtml(n)}">`).join('')}</datalist></div>
       <div class="field span-2"><label for="tcf-notes">Detalle (opcional)</label><textarea id="tcf-notes" rows="3" oninput="autoGrow(this)" placeholder="Qué compraste, para quién…">${escapeHtml(t?t.notes||'':'')}</textarea></div>
-      <div class="field"><label for="tcf-cat">Categoría</label><select id="tcf-cat" onchange="window.__tcmF.catTouched=true">${tciCategoryOptions(cats, catId, 1)}</select></div>
+      <div class="field"><label for="tcf-cat">Categoría</label>${catPickerField('tcf-cat', catId, { kind:'exp', onchange:'window.__tcmF.catTouched=true' })}</div>
       <div class="field"><label for="tcf-stmt">Estado de cuenta</label><select id="tcf-stmt" onchange="window.__tcmF.stmtTouched=true">${tcmStmtOptions(stmt)}</select></div>
       <div class="field"><label for="tcf-cb">Cashback</label><input id="tcf-cb" type="number" step="0.0001" min="0" value="${t && t.cashback!=null ? t.cashback : ''}" oninput="window.__tcmF.cbTouched=true" placeholder="0.00"><span class="hint" id="tcf-cbhint"></span></div>
       <div class="field"><label for="tcf-zero">Tasa cero</label><select id="tcf-zero"></select></div>
@@ -4728,9 +4808,8 @@ function tcmChargeRecalc(what) {
     const key = tciMerchantKey(document.getElementById('tcf-name').value);
     const rules = tciGetConfig('merchantRules', {});
     if (!App.tcmLearned) App.tcmLearned = tciLearnFromHistory();
-    const cat = rules[key] || App.tcmLearned[key];
-    const sel = document.getElementById('tcf-cat');
-    if (cat && sel.querySelector(`option[value="${cat}"]`)) sel.value = String(cat);
+    const cat = [rules[key], App.tcmLearned[key]].find(c=>c && tciIsExpenseCat(c));
+    if (cat) catPickSet('tcf-cat', cat);
   }
 }
 function tcmSaveCharge(asNew) {
@@ -4742,6 +4821,7 @@ function tcmSaveCharge(asNew) {
   if (!(amount>0)) { showToast('Escribe el monto del cargo.', 'error'); return; }
   if (!day) { showToast('Elige la fecha del cargo.', 'error'); return; }
   if (!name) { showToast('Escribe una descripción para reconocer el cargo.', 'error'); return; }
+  if (document.getElementById('tcf-cat').value === '') { showToast('Elige la categoría del cargo.', 'error'); return; }
   const categoryId = Number(document.getElementById('tcf-cat').value);
   const stmt = document.getElementById('tcf-stmt').value;
   const cbRaw = document.getElementById('tcf-cb').value;
@@ -4762,7 +4842,7 @@ function tcmSaveCharge(asNew) {
   }
   dbRun(`INSERT OR REPLACE INTO OC_TC_TXN (txnId, accountId, kind, stmt, cashback, tcCode, personas) VALUES (?,?,?,?,?,?,?)`,
     [id, accountId, 'charge', stmt, cashback, tcCode, JSON.stringify(personas)]);
-  if (F.catTouched) {
+  if (F.catTouched && tciIsExpenseCat(categoryId)) {
     tciEnsureTables();
     const rules = tciGetConfig('merchantRules', {}); rules[tciMerchantKey(name)] = String(categoryId); tciSetConfig('merchantRules', rules);
   }
@@ -4844,15 +4924,15 @@ function tcmSavePayment() {
     const out = legs.find(l=>l.amount<0), inn = legs.find(l=>l.amount>=0);
     const grp = F.grp || Date.now();
     if (out) dbRun(`UPDATE TRANSACTIONSTABLE SET amount=?, date=?, accountID=?, accountPairID=?, notes=?, transferGroupID=? WHERE transactionsTableID=?`, [-scaled, dateStr, from, accountId, notes, grp, out.id]);
-    else insertTransaction({ amount:-scaled, currency:'USD', date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:1, accountId:from, accountPairId:accountId, notes, transferGroupId:grp, itemId });
+    else insertTransaction({ amount:-scaled, currency:'USD', date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:ocTransferCategoryId(), accountId:from, accountPairId:accountId, notes, transferGroupId:grp, itemId });
     if (inn) { dbRun(`UPDATE TRANSACTIONSTABLE SET amount=?, date=?, accountID=?, accountPairID=?, notes=?, transferGroupID=? WHERE transactionsTableID=?`, [scaled, dateStr, accountId, from, notes, grp, inn.id]); cardLeg = inn.id; }
-    else cardLeg = insertTransaction({ amount:scaled, currency:'USD', date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:1, accountId, accountPairId:from, notes, transferGroupId:grp, itemId });
+    else cardLeg = insertTransaction({ amount:scaled, currency:'USD', date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:ocTransferCategoryId(), accountId, accountPairId:from, notes, transferGroupId:grp, itemId });
     if (cardLeg!==F.id) dbRun(`DELETE FROM OC_TC_TXN WHERE txnId=?`, [F.id]);
   } else {
     const maxGrp = (dbOne(`SELECT MAX(transferGroupID) m FROM TRANSACTIONSTABLE`)||{}).m || 0;
     const grp = Math.max(Date.now(), maxGrp+1);
-    insertTransaction({ amount:-scaled, currency:'USD', date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:1, accountId:from, accountPairId:accountId, notes, transferGroupId:grp, itemId });
-    cardLeg = insertTransaction({ amount:scaled, currency:'USD', date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:1, accountId, accountPairId:from, notes, transferGroupId:grp, itemId });
+    insertTransaction({ amount:-scaled, currency:'USD', date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:ocTransferCategoryId(), accountId:from, accountPairId:accountId, notes, transferGroupId:grp, itemId });
+    cardLeg = insertTransaction({ amount:scaled, currency:'USD', date:dateStr, typeId:TXN_TYPE.TRANSFERENCIA, categoryId:ocTransferCategoryId(), accountId, accountPairId:from, notes, transferGroupId:grp, itemId });
   }
   dbRun(`INSERT OR REPLACE INTO OC_TC_TXN (txnId, accountId, kind, stmt, cashback, tcCode, personas) VALUES (?,?,?,?,0,NULL,'[]')`, [cardLeg, accountId, 'payment', stmt]);
   tciEnsureTables();
@@ -5235,6 +5315,103 @@ function tcmRemoveCard(accountId) {
 function tcmInitialView() { return (location.hash||'').toLowerCase()==='#tarjetas' ? 'tarjetas' : 'dashboard'; }
 
 /* =====================================================================
+   CATEGORÍAS DE LOS CARGOS (v6.3)
+   Corrige cargos que quedaron con una categoría que no es de Gastos
+   (Transferir o la "Sin Categoría" de Ingresos) y permite categorizar por
+   comercio, de una vez, los cargos que siguen sin categoría.
+   ===================================================================== */
+function tcmBadCategoryRows() {
+  return dbAll(`SELECT tr.transactionsTableID id, tr.categoryID, i.itemName, tr.notes FROM TRANSACTIONSTABLE tr
+    JOIN OC_TC_CARD k ON k.accountId = tr.accountID
+    LEFT JOIN ITEMTABLE i ON i.itemTableID = tr.itemID
+    LEFT JOIN CHILDCATEGORYTABLE c ON c.categoryTableID = tr.categoryID
+    LEFT JOIN PARENTCATEGORYTABLE p ON p.parentCategoryTableID = c.parentCategoryID
+    WHERE tr.deletedTransaction=6 AND tr.transactionTypeID=3 AND (p.categoryGroupID IS NULL OR p.categoryGroupID<>?)`, [tciGroupIds().exp]);
+}
+/* Cargos de tarjeta por categorizar: categoría que no es de gastos, o la "(Sin Categoría)" de gastos */
+function tcmPendingCatRows() {
+  const bad = tcmBadCategoryRows();
+  const ph = dbAll(`SELECT tr.transactionsTableID id, tr.categoryID, i.itemName, tr.notes FROM TRANSACTIONSTABLE tr
+    JOIN OC_TC_CARD k ON k.accountId = tr.accountID
+    LEFT JOIN ITEMTABLE i ON i.itemTableID = tr.itemID
+    JOIN CHILDCATEGORYTABLE c ON c.categoryTableID = tr.categoryID
+    WHERE tr.deletedTransaction=6 AND tr.transactionTypeID=3 AND TRIM(c.childCategoryName) IN ('(Sin Categoría)','(Sin Categoria)')`);
+  const seen = new Set(bad.map(r=>r.id));
+  return bad.concat(ph.filter(r=>!seen.has(r.id)));
+}
+function tcmCategoryBanner() {
+  let n = 0; try { n = tcmPendingCatRows().length; } catch(e) { return ''; }
+  if (!n) return '';
+  return `<div class="tci-box warn" role="status"><h4>${n} cargo${n===1?'':'s'} de tarjeta por categorizar</h4>
+    <p class="hint">Tienen “Transferir” o una “(Sin Categoría)”, que no son categorías de gastos. Clasifícalos por comercio, todos de una vez; lo que elijas queda como regla para los próximos cargos. Cuando una “(Sin Categoría)” quede vacía, se elimina sola.</p>
+    <p><button class="btn primary small" onclick="tcmOpenCategorizer()">Categorizar</button></p></div>`;
+}
+function tcmOpenCategorizer() {
+  const rows = tcmPendingCatRows();
+  if (!rows.length) { showToast('No quedan cargos por categorizar.', 'success'); return; }
+  tciEnsureTables();
+  const rules = tciGetConfig('merchantRules', {});
+  let removed = 0;
+  Object.keys(rules).forEach(k=>{ if (!tciIsExpenseCat(rules[k])) { delete rules[k]; removed++; } });
+  if (removed) { tciSetConfig('merchantRules', rules); scheduleAutosave(); }
+  App.tcmLearned = tciLearnFromHistory();
+  const groups = {};
+  rows.forEach(r=>{
+    const k = tciMerchantKey(r.itemName || r.notes);
+    if (!groups[k]) groups[k] = { key:k, sample:r.itemName || r.notes || '(sin nombre)', ids:[], total:0 };
+    groups[k].ids.push(r.id);
+  });
+  Object.values(groups).forEach(g=>{
+    g.total = g.ids.reduce((s,id)=>s + Math.abs((dbOne(`SELECT amount FROM TRANSACTIONSTABLE WHERE transactionsTableID=?`, [id])||{amount:0}).amount/SCALE), 0);
+  });
+  const list = Object.values(groups).sort((a,b)=>b.ids.length-a.ids.length || b.total-a.total);
+  window.__tcmCat = list.map(g=>{
+    const s = [rules[g.key], App.tcmLearned[g.key]].find(c=>c!=null && c!=='' && tciIsExpenseCat(c));
+    return Object.assign(g, { value: s!=null ? String(s) : '', suggested: s!=null });
+  });
+  const sug = window.__tcmCat.filter(g=>g.suggested).length;
+  openModal(`<div class="modal wide"><div class="modal-head"><h3>Categorizar cargos de tarjeta</h3><button class="modal-close" onclick="closeModal()" aria-label="Cerrar">✕</button></div>
+    <div class="modal-body">
+      <p class="tci-intro">${rows.length} cargos en ${list.length} comercios. Elige la categoría de cada comercio y se aplica a todos sus cargos.${sug?` ${sug} ya vienen sugeridos (borde verde) según lo que usas para ese comercio.`:''} No tienes que terminar ahora: los que dejes quedan para después.${removed?` Se quitaron ${removed} reglas que apuntaban a categorías que no son de gastos.`:''}</p>
+      <div class="tci-box">${window.__tcmCat.map((g,i)=>`<div class="tci-row ${g.suggested?'learned':''}">
+        <div><div class="tci-name">${escapeHtml(g.sample)}</div><div class="tci-meta">${g.ids.length} cargo${g.ids.length===1?'':'s'} · ${tcmMoney(g.total)}${g.suggested?' · sugerida':''}</div></div>
+        ${catPickerField('tcm-cg-'+i, g.value, { kind:'exp', empty:'Dejar para después', placeholder:'Dejar para después', onchange:`window.__tcmCat[${i}].value=value` })}</div>`).join('')}</div>
+    </div>
+    <div class="modal-foot stack"><button class="btn ghost" onclick="closeModal()">Después</button>
+      <button class="btn" onclick="tcmApplyCategorizer(true)">Aplicar y poner “Otros” al resto</button>
+      <button class="btn primary" onclick="tcmApplyCategorizer(false)">Aplicar</button></div></div>`);
+  document.getElementById('modal-root').onclick = null;
+}
+function tcmApplyCategorizer(fillRest) {
+  const all = window.__tcmCat || [];
+  const chosen = all.filter(g=>g.value!=='' && g.value!=null);
+  const rest = all.filter(g=>g.value==='' || g.value==null);
+  if (!chosen.length && !(fillRest && rest.length)) { closeModal(); return; }
+  tciEnsureTables();
+  const rules = tciGetConfig('merchantRules', {});
+  let n = 0, nOtros = 0;
+  App.db.run('BEGIN');
+  try {
+    chosen.forEach(g=>{
+      g.ids.forEach(id=>{ App.db.run(`UPDATE TRANSACTIONSTABLE SET categoryID=? WHERE transactionsTableID=?`, [Number(g.value), id]); n++; });
+      if (g.key !== '(SIN DESCRIPCION)') rules[g.key] = String(g.value);
+    });
+    if (fillRest && rest.length) {
+      const otros = ocEnsureOtrosExpense();
+      rest.forEach(g=>g.ids.forEach(id=>{ App.db.run(`UPDATE TRANSACTIONSTABLE SET categoryID=? WHERE transactionsTableID=?`, [otros, id]); nOtros++; }));
+    }
+    tciSetConfig('merchantRules', rules);
+    App.db.run('COMMIT');
+  } catch (err) { try { App.db.run('ROLLBACK'); } catch(e) {} showToast('No se pudo aplicar: ' + err.message, 'error'); return; }
+  App.tcmLearned = null;
+  ocCategoryMaintenance();
+  scheduleAutosave();
+  closeModal();
+  showToast(`${n} cargo${n===1?'':'s'} categorizado${n===1?'':'s'}${nOtros?` y ${nOtros} en “Otros”`:''}.`, 'success');
+  refreshAfterChange();
+}
+
+/* =====================================================================
    RESPALDOS JSON + SINCRONIZACIÓN CON GITHUB  (v6.0)
    ---------------------------------------------------------------------
    Formato propio de OWNCOIN, independiente de Bluecoins:
@@ -5247,7 +5424,7 @@ function tcmInitialView() { return (location.hash||'').toLowerCase()==='#tarjeta
    El mismo JSON sirve para descargarlo como respaldo y para guardarlo en
    un repositorio PRIVADO de GitHub mediante su API de contenidos.
    ===================================================================== */
-const OC_APP_VERSION = '6.2';
+const OC_APP_VERSION = '6.4';
 const BKP_FORMAT = 'owncoin-backup';
 
 /* ---------- JSON <-> base de datos ---------- */
@@ -5755,15 +5932,12 @@ function powerResultText(r) {
     : 'Tus datos quedaron guardados en este dispositivo.';
 }
 async function powerOff() {
-  if (document.getElementById('power-btn-busy')) return;
-  openModal(`<div class="modal" id="power-btn-busy" style="max-width:340px;"><div class="modal-body" style="text-align:center;padding:26px 20px;">
-    <div style="font-size:26px;color:var(--gold-500);margin-bottom:8px;" aria-hidden="true"><span class="sync-ic" style="display:inline-block;animation:ghspin 1s linear infinite;">⟳</span></div>
-    <div style="font-weight:700;color:var(--heading);">Guardando antes de salir…</div>
-    <div class="hint">${ghsReady() ? 'Subiendo tus cambios a GitHub' : 'Guardando en este dispositivo'}</div></div></div>`);
-  document.getElementById('modal-root').onclick = null;
+  const pb = document.getElementById('power-busy'); if (pb && pb.classList.contains('show')) return;
+  closeModal();
+  powerBusyShow(ghsReady() ? 'Subiendo tus cambios a GitHub' : 'Guardando en este dispositivo');
   let result = 'local';
   try { result = await powerFlush(); } catch (e) { console.error(e); result = ghsReady() ? 'pending' : 'local'; }
-  closeModal();
+  powerBusyHide();
   const cfg = await getSecurityConfig();
   if (cfg.enabled) {
     lockNow();
@@ -5805,6 +5979,253 @@ function powerReopen() {
   bootApp();
   if (ghsReady()) ghsSync('open');
 }
+
+/* =====================================================================
+   CATEGORÍAS (v6.4)
+   - Qué categorías se pueden elegir: solo las de los grupos Gastos e
+     Ingresos (se reconocen por nombre, no por número). Las de sistema,
+     “(Nueva cuenta)” y “(Transferir)”, no aparecen en las listas.
+   - Selector visual: ícono + código final + nombre, agrupado por categoría
+     padre, con búsqueda.
+   - Uso: cuántos movimientos tiene cada categoría y acceso a verlos.
+   - Limpieza: las “(Sin Categoría)” vacías se eliminan solas.
+   ===================================================================== */
+
+/* ---------- qué es elegible ---------- */
+function ocSelectableCats(kind) {
+  const G = tciGroupIds();
+  const groups = kind==='exp' ? [G.exp] : kind==='inc' ? [G.inc] : [G.exp, G.inc];
+  return dbAll(`SELECT c.*, p.parentCategoryName, p.parentCategoryTableID pid, p.categoryGroupID grp
+    FROM CHILDCATEGORYTABLE c JOIN PARENTCATEGORYTABLE p ON p.parentCategoryTableID = c.parentCategoryID
+    WHERE p.categoryGroupID IN (${groups.map(Number).join(',')})
+    ORDER BY CASE p.categoryGroupID WHEN ${Number(G.exp)} THEN 0 ELSE 1 END, p.parentCategoryName, c.childCategoryName`);
+}
+function ocSelectableParents() {
+  const G = tciGroupIds();
+  return dbAll(`SELECT * FROM PARENTCATEGORYTABLE WHERE categoryGroupID IN (${Number(G.exp)},${Number(G.inc)})
+    ORDER BY CASE categoryGroupID WHEN ${Number(G.exp)} THEN 0 ELSE 1 END, parentCategoryName`);
+}
+/* Categoría que llevan las transferencias: la del grupo Transferir, si existe */
+function ocTransferCategoryId() {
+  const G = tciGroupIds();
+  const r = (G.transfer!=null && dbOne(`SELECT c.categoryTableID id FROM CHILDCATEGORYTABLE c JOIN PARENTCATEGORYTABLE p ON p.parentCategoryTableID=c.parentCategoryID WHERE p.categoryGroupID=? ORDER BY c.categoryTableID LIMIT 1`, [G.transfer]))
+    || dbOne(`SELECT c.categoryTableID id FROM CHILDCATEGORYTABLE c JOIN PARENTCATEGORYTABLE p ON p.parentCategoryTableID=c.parentCategoryID WHERE p.parentCategoryName LIKE '%Transfer%' ORDER BY c.categoryTableID LIMIT 1`);
+  return r ? r.id : 0;
+}
+
+/* "010101 - Despensa" bajo "0101 - Residencia" → código final "01", nombre "Despensa" */
+function ocSplitCode(name) {
+  const m = /^\s*(\d[\d.]*)\s*[-–·.]\s*(.+?)\s*$/.exec(String(name||''));
+  return m ? { code:m[1], name:m[2] } : { code:'', name:String(name||'').trim() };
+}
+function ocCatParts(c) {
+  const ch = ocSplitCode(c.childCategoryName), pa = ocSplitCode(c.parentCategoryName);
+  let tail = ch.code;
+  if (ch.code && pa.code && ch.code.startsWith(pa.code) && ch.code.length > pa.code.length) tail = ch.code.slice(pa.code.length);
+  return { tail, name: ch.name, parentCode: pa.code, parentName: pa.name };
+}
+function ocCatById(id) {
+  if (id === '' || id == null) return null;
+  return dbOne(`SELECT c.*, p.parentCategoryName, p.categoryGroupID grp FROM CHILDCATEGORYTABLE c
+    LEFT JOIN PARENTCATEGORYTABLE p ON p.parentCategoryTableID = c.parentCategoryID WHERE c.categoryTableID=?`, [Number(id)]);
+}
+
+/* ---------- selector visual ---------- */
+window.__catPick = window.__catPick || {};
+function catPickLabel(value, placeholder) {
+  const c = ocCatById(value);
+  if (!c) return `<span class="catpick-ph">${escapeHtml(placeholder || 'Elige una categoría')}</span><span class="catpick-chev" aria-hidden="true">▾</span>`;
+  const p = ocCatParts(c);
+  return `<span class="catpick-ic msi" aria-hidden="true">${getCategoryIconLigature(c)}</span>
+    <span class="catpick-txt"><span class="catpick-name">${p.tail?`<b>${escapeHtml(p.tail)}</b> `:''}${escapeHtml(p.name)}</span>
+    <span class="catpick-parent">${escapeHtml(p.parentName)}</span></span><span class="catpick-chev" aria-hidden="true">▾</span>`;
+}
+/* Campo de categoría. Guarda el valor en un input oculto con el mismo id que usaba el <select>.
+   opts: { kind:'exp'|'inc'|'all', placeholder, empty (texto de la opción vacía), onchange (código JS con `value`) } */
+function catPickerField(id, value, opts={}) {
+  window.__catPick[id] = Object.assign({ kind:'all' }, opts);
+  const v = (value === null || value === undefined) ? '' : String(value);
+  return `<input type="hidden" id="${id}" value="${escapeHtml(v)}"><button type="button" class="catpick-btn" id="${id}-btn"
+    aria-haspopup="listbox" onclick="openCatPicker('${id}')">${catPickLabel(v, opts.placeholder)}</button>`;
+}
+function catPickSet(id, value, fire) {
+  const input = document.getElementById(id); if (!input) return;
+  input.value = (value === null || value === undefined) ? '' : String(value);
+  const o = window.__catPick[id] || {};
+  const btn = document.getElementById(id+'-btn'); if (btn) btn.innerHTML = catPickLabel(input.value, o.placeholder);
+  if (fire && o.onchange) { try { new Function('value', o.onchange)(input.value); } catch(e) { console.error(e); } }
+}
+function openCatPicker(id) {
+  const o = window.__catPick[id] || { kind:'all' };
+  const cur = (document.getElementById(id)||{}).value || '';
+  const cats = ocSelectableCats(o.kind);
+  const G = tciGroupIds();
+  let root = document.getElementById('catpick-root');
+  if (!root) { root = document.createElement('div'); root.id = 'catpick-root'; document.body.appendChild(root); }
+  root.className = 'catpick-backdrop open';
+  root.onclick = (e)=>{ if (e.target === root) closeCatPicker(); };
+  const groupsHtml = [];
+  let lastParent = null, lastGrp = null;
+  cats.forEach(c=>{
+    if (o.kind==='all' && c.grp !== lastGrp) { groupsHtml.push(`<div class="catpick-grp">${c.grp===G.exp?'Gastos':'Ingresos'}</div>`); lastGrp = c.grp; }
+    if (c.pid !== lastParent) {
+      const pp = ocSplitCode(c.parentCategoryName);
+      groupsHtml.push(`<div class="catpick-head" data-parent="${c.pid}">${pp.code?`<b>${escapeHtml(pp.code)}</b> `:''}${escapeHtml(pp.name)}</div>`);
+      lastParent = c.pid;
+    }
+    const p = ocCatParts(c);
+    const sel = String(c.categoryTableID) === String(cur);
+    const search = tciNorm(`${c.childCategoryName} ${c.parentCategoryName}`);
+    groupsHtml.push(`<button type="button" class="catpick-item ${sel?'selected':''}" role="option" aria-selected="${sel}" data-parent="${c.pid}" data-s="${escapeHtml(search)}"
+      onclick="pickCat('${id}', '${c.categoryTableID}')">
+      <span class="catpick-ic msi" aria-hidden="true">${getCategoryIconLigature(c)}</span>
+      <span class="catpick-code">${escapeHtml(p.tail || '')}</span>
+      <span class="catpick-name">${escapeHtml(p.name)}</span>${sel?'<span class="catpick-check" aria-hidden="true">✓</span>':''}</button>`);
+  });
+  root.innerHTML = `<div class="catpick-sheet" role="dialog" aria-modal="true" aria-label="Elegir categoría">
+    <div class="catpick-top"><h3>Elegir categoría</h3><button type="button" class="modal-close" onclick="closeCatPicker()" aria-label="Cerrar">✕</button></div>
+    <div class="catpick-search"><input id="catpick-q" type="search" placeholder="Buscar por nombre o código…" oninput="filterCatPicker(this.value)" autocomplete="off"></div>
+    <div class="catpick-list" role="listbox">
+      ${o.empty ? `<button type="button" class="catpick-item catpick-empty ${!cur?'selected':''}" onclick="pickCat('${id}', '')"><span class="catpick-ic" aria-hidden="true">–</span><span class="catpick-code"></span><span class="catpick-name">${escapeHtml(o.empty)}</span></button>` : ''}
+      ${groupsHtml.join('') || '<p class="hint" style="padding:16px;">No hay categorías de este tipo.</p>'}
+      <p class="hint catpick-none" style="padding:16px;display:none;">Ninguna categoría coincide.</p>
+    </div></div>`;
+  const q = document.getElementById('catpick-q');
+  if (window.matchMedia('(hover: hover)').matches) setTimeout(()=>q.focus(), 30);
+  const s = root.querySelector('.catpick-item.selected'); if (s) s.scrollIntoView({ block:'center' });
+  document.addEventListener('keydown', catPickEsc);
+}
+function catPickEsc(e) { if (e.key === 'Escape') { e.stopPropagation(); closeCatPicker(); } }
+function filterCatPicker(q) {
+  const n = tciNorm(q);
+  const root = document.getElementById('catpick-root');
+  const visibleParents = new Set();
+  let any = false;
+  root.querySelectorAll('.catpick-item[data-s]').forEach(el=>{
+    const ok = !n || el.dataset.s.includes(n);
+    el.style.display = ok ? '' : 'none';
+    if (ok) { visibleParents.add(el.dataset.parent); any = true; }
+  });
+  root.querySelectorAll('.catpick-head').forEach(h=>{ h.style.display = visibleParents.has(h.dataset.parent) ? '' : 'none'; });
+  root.querySelectorAll('.catpick-grp').forEach(g=>{ g.style.display = n ? 'none' : ''; });
+  const empty = root.querySelector('.catpick-item.catpick-empty'); if (empty) empty.style.display = n ? 'none' : '';
+  root.querySelector('.catpick-none').style.display = any ? 'none' : '';
+}
+function pickCat(id, value) { closeCatPicker(); catPickSet(id, value, true); }
+function closeCatPicker() {
+  const root = document.getElementById('catpick-root');
+  if (root) { root.className = 'catpick-backdrop'; root.innerHTML = ''; }
+  document.removeEventListener('keydown', catPickEsc);
+}
+
+/* ---------- uso de cada categoría ---------- */
+function ocCategoryUsage() {
+  const rows = dbAll(`SELECT categoryID id, COUNT(*) n, SUM(ABS(amount)) s FROM TRANSACTIONSTABLE
+    WHERE deletedTransaction=6 AND transactionTypeID IN (3,4) GROUP BY categoryID`);
+  const m = {}; rows.forEach(r=>m[r.id] = { n:r.n, total:r.s/SCALE }); return m;
+}
+function ocViewCategory(id) {
+  App.txnFilters = { account:'', category:String(id), type:'', from:'', to:'', search:'' };
+  App.filtersOpen = true;
+  switchView('transacciones');
+}
+
+/* ---------- eliminar con reasignación ---------- */
+function ocConfirmDeleteCategory(id) {
+  const c = ocCatById(id); if (!c) return;
+  const used = (ocCategoryUsage()[id] || { n:0 }).n;
+  const kind = c.grp === tciGroupIds().inc ? 'inc' : 'exp';
+  openModal(`<div class="modal"><div class="modal-head"><h3>Eliminar categoría</h3><button class="modal-close" onclick="closeModal()" aria-label="Cerrar">✕</button></div>
+    <div class="modal-body">
+      <p style="margin-top:0;"><b>${escapeHtml(c.childCategoryName)}</b> ${used ? `tiene <b>${used}</b> movimiento${used===1?'':'s'}. Elige a qué categoría pasan antes de eliminarla.` : 'no tiene movimientos.'}</p>
+      ${used ? `<div class="field"><label>Pasar sus movimientos a</label>${catPickerField('del-cat-dest', '', { kind, placeholder:'Elige la categoría destino' })}</div>` : ''}
+    </div>
+    <div class="modal-foot"><button class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn danger" onclick="ocDoDeleteCategory(${id}, ${used})">Eliminar</button></div></div>`);
+}
+function ocDoDeleteCategory(id, used) {
+  let dest = null;
+  if (used) {
+    dest = document.getElementById('del-cat-dest').value;
+    if (dest === '') { showToast('Elige a qué categoría pasan sus movimientos.', 'error'); return; }
+    if (String(dest) === String(id)) { showToast('Elige una categoría distinta.', 'error'); return; }
+  }
+  App.db.run('BEGIN');
+  try {
+    if (used) App.db.run(`UPDATE TRANSACTIONSTABLE SET categoryID=? WHERE categoryID=? AND transactionTypeID IN (3,4)`, [Number(dest), id]);
+    ocRemoveCategoryRow(id);
+    App.db.run('COMMIT');
+  } catch (err) { try { App.db.run('ROLLBACK'); } catch(e) {} showToast('No se pudo eliminar: ' + err.message, 'error'); return; }
+  scheduleAutosave(); closeModal(); showToast('Categoría eliminada.', 'success'); refreshAfterChange();
+}
+/* Borra la subcategoría, sus reglas de comercio y, si queda vacía, la categoría padre de relleno */
+function ocRemoveCategoryRow(id) {
+  const c = ocCatById(id);
+  App.db.run(`DELETE FROM CHILDCATEGORYTABLE WHERE categoryTableID=?`, [id]);
+  if (tciTableExists('OC_TC_CONFIG')) {
+    const rules = tciGetConfig('merchantRules', {});
+    let ch = false; Object.keys(rules).forEach(k=>{ if (String(rules[k])===String(id)) { delete rules[k]; ch = true; } });
+    if (ch) tciSetConfig('merchantRules', rules);
+    if (String(tciGetConfig('incomeCategory', ''))===String(id)) App.db.run(`DELETE FROM OC_TC_CONFIG WHERE k='incomeCategory'`);
+  }
+  if (c && /^\s*\(Sin Categor[ií]a\)\s*$/i.test(c.parentCategoryName||'')) {
+    const left = dbOne(`SELECT COUNT(*) n FROM CHILDCATEGORYTABLE WHERE parentCategoryID=?`, [c.parentCategoryID]).n;
+    if (!left) App.db.run(`DELETE FROM PARENTCATEGORYTABLE WHERE parentCategoryTableID=?`, [c.parentCategoryID]);
+  }
+}
+function ocConfirmDeleteParent(pid) {
+  const p = dbOne(`SELECT * FROM PARENTCATEGORYTABLE WHERE parentCategoryTableID=?`, [pid]); if (!p) return;
+  openModal(`<div class="modal"><div class="modal-head"><h3>Eliminar grupo</h3><button class="modal-close" onclick="closeModal()" aria-label="Cerrar">✕</button></div>
+    <div class="modal-body"><p style="margin-top:0;">El grupo <b>${escapeHtml(p.parentCategoryName)}</b> no tiene subcategorías. ¿Eliminarlo?</p></div>
+    <div class="modal-foot"><button class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn danger" onclick="dbRun('DELETE FROM PARENTCATEGORYTABLE WHERE parentCategoryTableID=?',[${pid}]); closeModal(); refreshAfterChange(); showToast('Grupo eliminado.','success');">Eliminar</button></div></div>`);
+}
+
+/* ---------- mantenimiento al abrir ---------- */
+/* 1) Las transferencias llevan la categoría del grupo Transferir (antes quedaban en "Otros" o "Sin Categoría").
+   2) Las "(Sin Categoría)" sin ningún movimiento se eliminan. */
+function ocCategoryMaintenance() {
+  if (!App.db) return;
+  try {
+    const tid = ocTransferCategoryId();
+    if (tid) {
+      const n = dbOne(`SELECT COUNT(*) n FROM TRANSACTIONSTABLE WHERE transactionTypeID=5 AND categoryID<>?`, [tid]).n;
+      if (n) App.db.run(`UPDATE TRANSACTIONSTABLE SET categoryID=? WHERE transactionTypeID=5 AND categoryID<>?`, [tid, tid]);
+    }
+    const empties = dbAll(`SELECT c.categoryTableID id, c.childCategoryName name FROM CHILDCATEGORYTABLE c
+      WHERE TRIM(c.childCategoryName) IN ('(Sin Categoría)','(Sin Categoria)')
+        AND NOT EXISTS (SELECT 1 FROM TRANSACTIONSTABLE t WHERE t.categoryID=c.categoryTableID AND t.deletedTransaction=6)`);
+    let removed = 0;
+    empties.forEach(e=>{
+      ocRemoveCategoryRow(e.id); removed++;
+    });
+    if (removed) { scheduleAutosave(); setTimeout(()=>showToast(removed===1 ? 'Se eliminó una categoría “(Sin Categoría)” que no tenía movimientos.' : `Se eliminaron ${removed} categorías “(Sin Categoría)” que no tenían movimientos.`, 'success'), 800); }
+  } catch (e) { console.warn('Mantenimiento de categorías:', e); }
+}
+
+/* "Otros" de gastos como último recurso (se crea solo si no existe) */
+function ocEnsureOtrosExpense() {
+  const E = tciGroupIds().exp;
+  const hit = dbOne(`SELECT c.categoryTableID id FROM CHILDCATEGORYTABLE c JOIN PARENTCATEGORYTABLE p ON p.parentCategoryTableID=c.parentCategoryID
+    WHERE p.categoryGroupID=? AND TRIM(c.childCategoryName) LIKE 'Otros%' ORDER BY c.categoryTableID LIMIT 1`, [E]);
+  if (hit) return hit.id;
+  let parent = dbOne(`SELECT parentCategoryTableID id FROM PARENTCATEGORYTABLE WHERE categoryGroupID=? AND TRIM(parentCategoryName) LIKE 'Otros%' LIMIT 1`, [E]);
+  if (!parent) {
+    App.db.run(`INSERT INTO PARENTCATEGORYTABLE (parentCategoryName, budgetAmountCategoryParent, budgetEnabledCategoryParent, categoryGroupID, budgetPeriodCategoryParent) VALUES ('Otros',0,0,?,0)`, [E]);
+    parent = { id: lastInsertId() };
+  }
+  App.db.run(`INSERT INTO CHILDCATEGORYTABLE (childCategoryName, budgetAmount, budgetEnabledCategoryChild, budgetPeriod, parentCategoryID, childCategoryIcon) VALUES ('Otros',0,0,0,?,?)`, [parent.id, ligatureToBluecoinsIcon('more_horiz')]);
+  return lastInsertId();
+}
+
+/* ---------- aviso compacto al salir (no ocupa toda la pantalla en el teléfono) ---------- */
+function powerBusyShow(text) {
+  let el = document.getElementById('power-busy');
+  if (!el) { el = document.createElement('div'); el.id = 'power-busy'; document.body.appendChild(el); }
+  el.className = 'power-busy show';
+  el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite');
+  el.innerHTML = `<div class="power-busy-card"><span class="sync-ic power-busy-spin" aria-hidden="true">⟳</span>
+    <div><div class="power-busy-title">Guardando antes de salir…</div><div class="power-busy-sub">${escapeHtml(text)}</div></div></div>`;
+}
+function powerBusyHide() { const el = document.getElementById('power-busy'); if (el) el.className = 'power-busy'; }
 
 main();
 </script>
