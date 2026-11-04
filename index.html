@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>🪙 OWNCOIN v7.1 — Gestor Financiero Personal</title>
+<title>🪙 OWNCOIN v7.2 — Gestor Financiero Personal</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -744,7 +744,7 @@ html[data-theme="dark"]{ --debt:#6b3535; }
 .app-topbar .pill-item:hover{ background:rgba(255,255,255,.12); color:#fff; }
 .app-topbar .pill-item.active{ background:linear-gradient(135deg, var(--gold-300), var(--gold-600)); color:var(--navy-900); box-shadow:none; }
 .app-topbar .pill-item:focus-visible{ outline:2px solid var(--gold-300); outline-offset:1px; }
-@media(min-width:1260px){
+@media(min-width:1400px){
   .app-topbar{ flex-wrap:nowrap; }
   .app-topbar .pill-nav{ order:2; flex:1 1 auto; background:none; border:none; }
   .topbar-actions{ order:3; }
@@ -1009,6 +1009,27 @@ html[data-theme="dark"] .btn:not(.primary):not(.danger):not(.ghost):hover{ backg
 .pal-sw span{ flex:1; }
 .pal-name{ flex:1; }
 .pal-check{ color:var(--ok); font-weight:800; }
+
+/* ---------- v7.2 ---------- */
+@keyframes ocNudge{ 0%,100%{ transform:translateX(0); } 20%{ transform:translateX(-7px); } 40%{ transform:translateX(7px); } 60%{ transform:translateX(-4px); } 80%{ transform:translateX(4px); } }
+.modal.nudge{ animation:ocNudge .35s ease; }
+@media (prefers-reduced-motion: reduce){ .modal.nudge{ animation:none; outline:2px solid var(--gold-500); } }
+/* Blanco y negro */
+html[data-palette="bn"]:not([data-theme="dark"]){ --navy-900:#0a0a0a; --navy-800:#1a1a1a; --navy-700:#2b2b2b; --navy-600:#3d3d3d; --gold-600:#3a3a3a; --gold-500:#5c5c5c; --gold-300:#d4d4d4; --gold-100:#efefef; --bg:#f4f4f4; --bg-deep:#e9e9e9; --paper:#ffffff; --line:#dcdcdc; --hover-bg:#f6f6f6; --input-bg:#ffffff; --scrollbar:#c4c4c4; --ring:rgba(0,0,0,.16); --heading:#0a0a0a; }
+html[data-palette="bn"][data-theme="dark"]{ --navy-900:#000000; --navy-800:#0f0f0f; --navy-700:#1f1f1f; --navy-600:#3a3a3a; --gold-600:#e6e6e6; --gold-500:#f2f2f2; --gold-300:#ffffff; --gold-100:#262626; --bg:#0b0b0b; --bg-deep:#000000; --card:#161616; --paper:#0b0b0b; --line:#2c2c2c; --input-bg:#101010; --hover-bg:#202020; --scrollbar:#3a3a3a; --ring:rgba(255,255,255,.2); }
+html[data-palette="bn"]:not([data-theme="dark"]) .btn.primary{ background:#0a0a0a; color:#fff; }
+html[data-palette="bn"]:not([data-theme="dark"]) .btn.primary:hover{ background:#2b2b2b; filter:none; }
+html[data-palette="bn"] .app-topbar .pill-item.active{ background:#ffffff; color:#0a0a0a; }
+html[data-palette="bn"]:not([data-theme="dark"]) .tcm-tab.active, html[data-palette="bn"]:not([data-theme="dark"]) .tci-step.active{ background:#0a0a0a; color:#fff; box-shadow:none; border-color:#0a0a0a; }
+/* Grises */
+html[data-palette="grises"]:not([data-theme="dark"]){ --navy-900:#2b2f36; --navy-800:#3a3f47; --navy-700:#4b515b; --navy-600:#5f6672; --gold-600:#626a76; --gold-500:#858c97; --gold-300:#c3c8cf; --gold-100:#eceef1; --bg:#f1f2f4; --bg-deep:#e5e7ea; --paper:#fafafb; --line:#dcdfe3; --hover-bg:#f5f6f7; --input-bg:#fdfdfd; --scrollbar:#c2c6cc; --ring:rgba(95,102,114,.22); }
+html[data-palette="grises"][data-theme="dark"]{ --navy-900:#15171a; --navy-800:#1f2226; --navy-700:#2c3035; --navy-600:#474d55; --gold-600:#a9b0ba; --gold-500:#c5cad1; --gold-300:#e3e6ea; --gold-100:#262a30; --bg:#101113; --bg-deep:#08090a; --card:#1b1d21; --paper:#131417; --line:#2d3036; --input-bg:#16181b; --hover-bg:#23262b; --scrollbar:#3a3e45; --ring:rgba(197,202,209,.2); }
+html[data-palette="grises"]:not([data-theme="dark"]) .btn.primary{ background:#5f6672; color:#fff; }
+html[data-palette="grises"]:not([data-theme="dark"]) .btn.primary:hover{ background:#4b515b; filter:none; }
+html[data-palette="grises"]:not([data-theme="dark"]) .app-topbar .pill-item.active{ background:#e3e6ea; color:#2b2f36; }
+.pal-sw{ box-shadow:0 0 0 1px rgba(0,0,0,.18); }
+/* En pantallas anchas el nombre OWNCOIN no se recorta: el menú cede el espacio */
+@media(min-width:1400px){ .app-brand{ flex:0 0 auto; container-type:normal; } .app-topbar .pill-nav{ min-width:0; } }
 </style>
 </head>
 <script>
@@ -1032,7 +1053,7 @@ html[data-theme="dark"] .btn:not(.primary):not(.danger):not(.ghost):hover{ backg
 <!-- ===================== LANDING (choose DB source) ===================== -->
 <div id="landing">
   <div class="landing-card">
-    <div class="landing-mark">🪙 OWNCOIN <span style="color:var(--gold-600);">v7.1</span><span class="digits">Gestor financiero personal</span></div>
+    <div class="landing-mark">🪙 OWNCOIN <span style="color:var(--gold-600);">v7.2</span><span class="digits">Gestor financiero personal</span></div>
     <p class="landing-sub">Tus cuentas, tarjetas y presupuestos en un solo lugar, con respaldos en JSON y sincronización con tu GitHub privado.</p>
     <div class="landing-options">
       <div class="landing-opt" id="opt-new">
@@ -1061,7 +1082,7 @@ html[data-theme="dark"] .btn:not(.primary):not(.danger):not(.ghost):hover{ backg
   <div class="app-brand">
     <div class="mark">🪙</div>
     <div style="min-width:0;">
-      <div class="name">OWNCOIN <small>v7.1</small></div>
+      <div class="name">OWNCOIN <small>v7.2</small></div>
       <div class="tag" id="brand-filename">sin archivo</div>
       <div class="tag" id="autosave-indicator" style="color:#a9d6bb;">—</div>
     </div>
@@ -1636,7 +1657,22 @@ function openModal(html) {
   const root = document.getElementById('modal-root');
   root.innerHTML = html;
   root.classList.add('open');
-  root.onclick = (e)=>{ if (e.target === root) closeModal(); };
+  root.__dirty = false;
+  // Cualquier dato escrito o elegido marca la ventana como "con cambios"
+  const markDirty = (e)=>{ if (e.target && e.target.matches && e.target.matches('input:not([type="search"]), textarea, select')) root.__dirty = true; };
+  root.oninput = markDirty; root.onchange = markDirty;
+  // Se recuerda dónde empezó el clic: al seleccionar texto con el mouse y soltarlo fuera de la
+  // ventana, el navegador reporta un clic en el fondo, y eso NO debe cerrarla.
+  root.onpointerdown = (e)=>{ root.__downOnBackdrop = (e.target === root); };
+  root.onclick = (e)=>{
+    if (e.target !== root || !root.__downOnBackdrop) return;
+    if (root.__dirty) { modalNudge(); showToast('Tienes datos sin guardar. Usa “Guardar” o “Cancelar” para cerrar la ventana.', 'error'); return; }
+    closeModal();
+  };
+}
+function modalNudge() {
+  const m = document.querySelector('#modal-root .modal'); if (!m) return;
+  m.classList.remove('nudge'); void m.offsetWidth; m.classList.add('nudge');
 }
 function closeModal() {
   App.modalReturn = null;
@@ -5611,7 +5647,7 @@ function tcmSaveCredit() {
    El mismo JSON sirve para descargarlo como respaldo y para guardarlo en
    un repositorio PRIVADO de GitHub mediante su API de contenidos.
    ===================================================================== */
-const OC_APP_VERSION = '7.1';
+const OC_APP_VERSION = '7.2';
 const BKP_FORMAT = 'owncoin-backup';
 
 /* ---------- JSON <-> base de datos ---------- */
@@ -6237,6 +6273,7 @@ function catPickerField(id, value, opts={}) {
 }
 function catPickSet(id, value, fire) {
   const input = document.getElementById(id); if (!input) return;
+  if (fire) { const mr = document.getElementById('modal-root'); if (mr && mr.contains(input)) mr.__dirty = true; }
   input.value = (value === null || value === undefined) ? '' : String(value);
   const o = window.__catPick[id] || {};
   const btn = document.getElementById(id+'-btn'); if (btn) btn.innerHTML = catPickLabel(input.value, o.placeholder);
@@ -6250,7 +6287,8 @@ function openCatPicker(id) {
   let root = document.getElementById('catpick-root');
   if (!root) { root = document.createElement('div'); root.id = 'catpick-root'; document.body.appendChild(root); }
   root.className = 'catpick-backdrop open';
-  root.onclick = (e)=>{ if (e.target === root) closeCatPicker(); };
+  root.onpointerdown = (e)=>{ root.__downOnBackdrop = (e.target === root); };
+  root.onclick = (e)=>{ if (e.target === root && root.__downOnBackdrop) closeCatPicker(); };
   const groupsHtml = [];
   let lastParent = null, lastGrp = null;
   cats.forEach(c=>{
@@ -6461,6 +6499,7 @@ function accPickerField(id, value, opts={}) {
 }
 function accPickSet(id, value, fire) {
   const input = document.getElementById(id); if (!input) return;
+  if (fire) { const mr = document.getElementById('modal-root'); if (mr && mr.contains(input)) mr.__dirty = true; }
   input.value = (value === null || value === undefined) ? '' : String(value);
   const o = window.__accPick[id] || {};
   const btn = document.getElementById(id+'-btn'); if (btn) btn.innerHTML = accPickLabel(input.value, o.placeholder);
@@ -6474,7 +6513,8 @@ function openAccPicker(id) {
   let root = document.getElementById('catpick-root');
   if (!root) { root = document.createElement('div'); root.id = 'catpick-root'; document.body.appendChild(root); }
   root.className = 'catpick-backdrop open';
-  root.onclick = (e)=>{ if (e.target === root) closeCatPicker(); };
+  root.onpointerdown = (e)=>{ root.__downOnBackdrop = (e.target === root); };
+  root.onclick = (e)=>{ if (e.target === root && root.__downOnBackdrop) closeCatPicker(); };
   const html = []; let lastG = null, lastT = null;
   accs.forEach(a=>{
     if (a.accountingGroupID !== lastG) { html.push(`<div class="catpick-grp">${a.accountingGroupID===2?'Pasivos':'Activos'}</div>`); lastG = a.accountingGroupID; lastT = null; }
@@ -6875,6 +6915,8 @@ const OC_PALETTES = [
   { id:'oceano',    name:'Océano',        main:'#0f4d5c', acc:'#17a9a6' },
   { id:'lavanda',   name:'Lavanda',       main:'#432663', acc:'#a888d6' },
   { id:'grafito',   name:'Grafito',       main:'#343941', acc:'#e07b2e' },
+  { id:'bn',        name:'Blanco y negro', main:'#0a0a0a', acc:'#ffffff' },
+  { id:'grises',    name:'Grises',        main:'#4b515b', acc:'#c3c8cf' },
 ];
 function ocGetPalette() { const p = localStorage.getItem('owncoin_palette'); return OC_PALETTES.some(x=>x.id===p) ? p : 'azul'; }
 function ocCssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
