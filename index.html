@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>🪙 OWNCOIN v7.0 — Gestor Financiero Personal</title>
+<title>🪙 OWNCOIN v7.1 — Gestor Financiero Personal</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -79,7 +79,7 @@ html[data-theme="dark"]{
   --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -8px rgba(0,0,0,.55);
 }
 html[data-theme="dark"] body{
-  background: linear-gradient(180deg, var(--bg) 0%, #060a12 100%);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
 }
 *{box-sizing:border-box; min-width:0;}
 html,body{margin:0;padding:0;}
@@ -88,7 +88,7 @@ body{
   color:var(--ink);
   background:
     radial-gradient(1200px 600px at 15% -10%, #ffffff 0%, transparent 60%),
-    linear-gradient(180deg, var(--bg) 0%, #e6eaf1 100%);
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
   min-height:100vh;
   -webkit-font-smoothing:antialiased;
   font-variant-numeric: tabular-nums;
@@ -346,7 +346,7 @@ table.ledger td.amount, table.ledger th.amount{ text-align:right; font-variant-n
   width:100%; min-width:0;
 }
 .field input:focus, .field select:focus, .field textarea:focus{
-  outline:none; border-color:var(--gold-500); box-shadow:0 0 0 3px rgba(200,151,58,.18);
+  outline:none; border-color:var(--gold-500); box-shadow:0 0 0 3px var(--ring);
 }
 .field textarea{ resize:vertical; min-height:60px; }
 .hint{ font-size:11px; color:var(--ink-soft); }
@@ -514,11 +514,11 @@ table.ledger td.amount, table.ledger th.amount{ text-align:right; font-variant-n
   min-height:100vh; display:flex; align-items:center; justify-content:center;
   background:
     radial-gradient(1200px 600px at 15% -10%, #ffffff 0%, transparent 60%),
-    linear-gradient(180deg, var(--bg) 0%, #e6eaf1 100%);
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
   padding:20px;
 }
 html[data-theme="dark"] #landing{
-  background: linear-gradient(180deg, var(--bg) 0%, #060a12 100%);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
 }
 .landing-card{ width:100%; max-width:640px; text-align:center; }
 .landing-mark{ font-family:var(--font-display); font-size:32px; font-weight:700; color:var(--heading); letter-spacing:.2px; }
@@ -611,7 +611,7 @@ html[data-theme="dark"] .tci-step.active{ color:var(--gold-300); }
   border:1.5px solid var(--line); border-radius:8px; padding:8px 10px; font-size:13px;
   font-family:var(--font-body); color:var(--ink); background:var(--input-bg); width:100%;
 }
-.tci-row select:focus, .tci-row input:focus{ outline:none; border-color:var(--gold-500); box-shadow:0 0 0 3px rgba(200,151,58,.18); }
+.tci-row select:focus, .tci-row input:focus{ outline:none; border-color:var(--gold-500); box-shadow:0 0 0 3px var(--ring); }
 .tci-row.learned select{ border-color:var(--ok); }
 @media(max-width:560px){ .tci-row{ grid-template-columns:1fr; gap:6px; } }
 .tci-swatch{ display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:7px; vertical-align:baseline; }
@@ -899,7 +899,7 @@ html[data-theme="dark"] .zoom-choices button.active{ color:var(--gold-300); back
   background:var(--input-bg); color:var(--ink); font-family:var(--font-body); font-size:14px;
 }
 .catpick-btn:hover{ border-color:var(--gold-300); }
-.catpick-btn:focus-visible{ outline:none; border-color:var(--gold-500); box-shadow:0 0 0 3px rgba(200,151,58,.18); }
+.catpick-btn:focus-visible{ outline:none; border-color:var(--gold-500); box-shadow:0 0 0 3px var(--ring); }
 .catpick-ic{ width:30px; height:30px; flex-shrink:0; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; overflow:hidden; white-space:nowrap;
   background:var(--gold-100); color:var(--gold-600); font-size:18px; }
 .catpick-txt{ display:flex; flex-direction:column; min-width:0; flex:1; line-height:1.2; }
@@ -928,7 +928,7 @@ html[data-theme="dark"] .catpick-head{ color:var(--gold-300); }
   padding:8px; border-radius:9px; color:var(--ink); font-family:var(--font-body); font-size:14px; min-height:44px; }
 .catpick-item:hover, .catpick-item:focus-visible{ background:var(--hover-bg); outline:none; }
 .catpick-item.selected{ background:var(--gold-100); }
-html[data-theme="dark"] .catpick-item.selected{ background:rgba(200,151,58,.18); }
+html[data-theme="dark"] .catpick-item.selected{ background:var(--ring); }
 .catpick-code{ min-width:26px; font-weight:800; color:var(--gold-600); font-variant-numeric:tabular-nums; }
 .catpick-item .catpick-name{ flex:1; }
 .catpick-check{ color:var(--ok); font-weight:800; }
@@ -953,7 +953,7 @@ html[data-theme="dark"] .cat-view-btn{ background:transparent; color:var(--gold-
 
 /* ---------- v6.5: selector de cuentas ---------- */
 .catpick-ic.acc{ background:rgba(42,77,120,.10); color:var(--navy-700); }
-html[data-theme="dark"] .catpick-ic.acc{ background:rgba(200,151,58,.15); color:var(--gold-300); }
+html[data-theme="dark"] .catpick-ic.acc{ background:var(--ring); color:var(--gold-300); }
 .catpick-bal{ font-size:12px; font-weight:700; color:var(--ok); font-variant-numeric:tabular-nums; white-space:nowrap; margin-left:auto; padding-left:8px; }
 .catpick-bal.neg{ color:var(--danger); }
 .catpick-item .catpick-name{ min-width:0; overflow:hidden; text-overflow:ellipsis; }
@@ -980,6 +980,35 @@ tr.rep-future td{ color:var(--ink-soft); }
 .rep-cat td, .rep-cmp td{ font-size:12.5px; }
 .txn-more{ display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin:14px 0 4px; }
 @media(max-width:560px){ .rep-bar{ flex-direction:column; align-items:stretch; } .rep-nav{ justify-content:center; } .rep-mode{ width:100%; } }
+
+/* ---------- v7.1: temas de color ---------- */
+:root{ --ring:rgba(200,151,58,.18); --bg-deep:#e6eaf1; }
+html[data-theme="dark"]{ --bg-deep:#060a12; }
+html[data-palette="esmeralda"]:not([data-theme="dark"]){ --navy-900:#0d2a22; --navy-800:#123a2f; --navy-700:#1a4d3f; --navy-600:#256652; --bg:#edf3f0; --paper:#f8fbf9; --line:#dbe6e1; --hover-bg:#f5f9f7; --input-bg:#fbfdfc; --scrollbar:#c3d4cc; --bg-deep:#e3ece8; }
+html[data-palette="esmeralda"][data-theme="dark"]{ --navy-900:#061a14; --navy-800:#0d2a22; --navy-700:#154234; --navy-600:#256652; --bg:#07120e; --card:#10201a; --paper:#0a1712; --line:#1f3a30; --input-bg:#0b1914; --hover-bg:#15291f; --scrollbar:#24443a; --bg-deep:#030a07; }
+html[data-palette="vino"]:not([data-theme="dark"]){ --navy-900:#3b0f1c; --navy-800:#4e1626; --navy-700:#651f33; --navy-600:#7d2a42; --gold-600:#a6784a; --gold-500:#c9a074; --gold-300:#e8cfae; --gold-100:#f7ede1; --bg:#f5efee; --paper:#fcf9f7; --line:#e8dcdb; --hover-bg:#faf5f4; --input-bg:#fdfbfa; --scrollbar:#d8c6c6; --ring:rgba(201,160,116,.28); --bg-deep:#efe6e4; }
+html[data-palette="vino"][data-theme="dark"]{ --navy-900:#22070f; --navy-800:#3b0f1c; --navy-700:#561a2c; --navy-600:#7d2a42; --gold-600:#c9a074; --gold-500:#e8cfae; --gold-300:#f3e2c9; --gold-100:#2c2016; --bg:#140a0c; --card:#221316; --paper:#180c0f; --line:#3a2427; --input-bg:#1a0e11; --hover-bg:#2b181c; --scrollbar:#4a2d33; --bg-deep:#0a0405; --ring:rgba(232,207,174,.22); }
+html[data-palette="oceano"]:not([data-theme="dark"]){ --navy-900:#072a33; --navy-800:#0b3a46; --navy-700:#0f4d5c; --navy-600:#146577; --gold-600:#0e8c8c; --gold-500:#17a9a6; --gold-300:#7fd6d1; --gold-100:#def4f2; --bg:#ecf3f4; --paper:#f7fbfb; --line:#d7e5e7; --hover-bg:#f3f8f9; --input-bg:#fbfdfd; --scrollbar:#bcd3d6; --ring:rgba(23,169,166,.22); --bg-deep:#e2ecee; }
+html[data-palette="oceano"][data-theme="dark"]{ --navy-900:#041a20; --navy-800:#072a33; --navy-700:#0c4150; --navy-600:#146577; --gold-600:#17a9a6; --gold-500:#4cc7c2; --gold-300:#9fe3de; --gold-100:#0e2a29; --bg:#061115; --card:#0e1f25; --paper:#08161b; --line:#1c3a42; --input-bg:#0a181d; --hover-bg:#13292f; --scrollbar:#24474f; --bg-deep:#020809; --ring:rgba(76,199,194,.22); }
+html[data-palette="lavanda"]:not([data-theme="dark"]){ --navy-900:#241338; --navy-800:#311b4b; --navy-700:#432663; --navy-600:#5a3580; --gold-600:#8e6bbf; --gold-500:#a888d6; --gold-300:#cdb8ec; --gold-100:#f0e8fa; --bg:#f1eef6; --paper:#faf8fc; --line:#e2dcec; --hover-bg:#f7f4fb; --input-bg:#fcfbfe; --scrollbar:#cfc4de; --ring:rgba(168,136,214,.28); --bg-deep:#e9e4f0; }
+html[data-palette="lavanda"][data-theme="dark"]{ --navy-900:#150a22; --navy-800:#241338; --navy-700:#3a2058; --navy-600:#5a3580; --gold-600:#a888d6; --gold-500:#c3a8ea; --gold-300:#ddcdf5; --gold-100:#221a33; --bg:#0e0a15; --card:#1a1424; --paper:#120d1a; --line:#2f2640; --input-bg:#140f1d; --hover-bg:#221a2e; --scrollbar:#3b3050; --bg-deep:#060409; --ring:rgba(195,168,234,.22); }
+html[data-palette="grafito"]:not([data-theme="dark"]){ --navy-900:#1c1f24; --navy-800:#262a31; --navy-700:#343941; --navy-600:#464c56; --gold-600:#c4621d; --gold-500:#e07b2e; --gold-300:#f2b27a; --gold-100:#fbe9da; --bg:#eff0f2; --paper:#fafafa; --line:#dfe1e5; --hover-bg:#f6f7f8; --input-bg:#fdfdfd; --scrollbar:#c9ccd2; --ring:rgba(224,123,46,.24); --bg-deep:#e6e7ea; }
+html[data-palette="grafito"][data-theme="dark"]{ --navy-900:#111316; --navy-800:#1c1f24; --navy-700:#2a2e35; --navy-600:#464c56; --gold-600:#e07b2e; --gold-500:#f0995a; --gold-300:#f7c296; --gold-100:#2e1f12; --bg:#0c0d0f; --card:#17191d; --paper:#101114; --line:#2a2d33; --input-bg:#121417; --hover-bg:#1f2227; --scrollbar:#353941; --bg-deep:#050506; --ring:rgba(240,153,90,.22); }
+html[data-theme="dark"][data-amoled]{ --bg:#000; --bg-deep:#000; --card:#0b0b0c; --paper:#000; --line:#1f1f22; --input-bg:#0e0e10; --hover-bg:#161618; --scrollbar:#2a2a2e; }
+html[data-theme="dark"][data-amoled] body{ background:#000; }
+html[data-theme="dark"][data-amoled] .app-topbar{ background:linear-gradient(120deg, #000, var(--navy-900) 70%, var(--navy-800)); }
+html[data-theme="dark"] .btn:not(.primary):not(.danger):not(.ghost){ background:var(--navy-600); }
+html[data-theme="dark"] .btn:not(.primary):not(.danger):not(.ghost):hover{ background:var(--navy-700); }
+.pal-grid{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px; }
+@media(max-width:480px){ .pal-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
+.pal-opt{ display:flex; align-items:center; gap:10px; padding:10px; border:1.5px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink); cursor:pointer; font-family:var(--font-body); font-weight:600; font-size:13px; text-align:left; min-height:48px; }
+.pal-opt:hover{ border-color:var(--gold-300); }
+.pal-opt:focus-visible{ outline:none; border-color:var(--gold-500); box-shadow:0 0 0 3px var(--ring); }
+.pal-opt.active{ border-color:var(--gold-500); background:var(--gold-100); }
+.pal-sw{ width:30px; height:30px; border-radius:50%; overflow:hidden; display:flex; flex-shrink:0; transform:rotate(45deg); box-shadow:0 0 0 1px rgba(0,0,0,.08); }
+.pal-sw span{ flex:1; }
+.pal-name{ flex:1; }
+.pal-check{ color:var(--ok); font-weight:800; }
 </style>
 </head>
 <script>
@@ -988,6 +1017,9 @@ tr.rep-future td{ color:var(--ink-soft); }
   try {
     const savedTheme = localStorage.getItem('owncoin_theme');
     if (savedTheme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    const savedPal = localStorage.getItem('owncoin_palette');
+    if (savedPal && savedPal !== 'azul') document.documentElement.setAttribute('data-palette', savedPal);
+    if (localStorage.getItem('owncoin_amoled') === '1') document.documentElement.setAttribute('data-amoled', '1');
     const savedZoom = parseFloat(localStorage.getItem('owncoin_zoom'));
     if (savedZoom && savedZoom !== 1) document.documentElement.style.zoom = savedZoom;
   } catch(e) {}
@@ -1000,7 +1032,7 @@ tr.rep-future td{ color:var(--ink-soft); }
 <!-- ===================== LANDING (choose DB source) ===================== -->
 <div id="landing">
   <div class="landing-card">
-    <div class="landing-mark">🪙 OWNCOIN <span style="color:var(--gold-600);">v7.0</span><span class="digits">Gestor financiero personal</span></div>
+    <div class="landing-mark">🪙 OWNCOIN <span style="color:var(--gold-600);">v7.1</span><span class="digits">Gestor financiero personal</span></div>
     <p class="landing-sub">Tus cuentas, tarjetas y presupuestos en un solo lugar, con respaldos en JSON y sincronización con tu GitHub privado.</p>
     <div class="landing-options">
       <div class="landing-opt" id="opt-new">
@@ -1029,7 +1061,7 @@ tr.rep-future td{ color:var(--ink-soft); }
   <div class="app-brand">
     <div class="mark">🪙</div>
     <div style="min-width:0;">
-      <div class="name">OWNCOIN <small>v7.0</small></div>
+      <div class="name">OWNCOIN <small>v7.1</small></div>
       <div class="tag" id="brand-filename">sin archivo</div>
       <div class="tag" id="autosave-indicator" style="color:#a9d6bb;">—</div>
     </div>
@@ -2207,7 +2239,7 @@ function renderNetWorthWidget() {
     data:{ labels: ocMonthLabels(months), datasets:[
       { label:'Activos', data: series.map(s=>s.activos/SCALE), borderColor:'#2f7d4f', backgroundColor:'#2f7d4f', tension:.25 },
       { label:'Pasivos', data: series.map(s=>s.pasivos/SCALE), borderColor:'#b23b3b', backgroundColor:'#b23b3b', tension:.25 },
-      { label:'Patrimonio neto', data: series.map(s=>s.neto/SCALE), borderColor:'#2a4d78', backgroundColor:'#2a4d78', tension:.25 },
+      { label:'Patrimonio neto', data: series.map(s=>s.neto/SCALE), borderColor:ocCssVar('--navy-600')||'#2a4d78', backgroundColor:ocCssVar('--navy-600')||'#2a4d78', tension:.25 },
     ]},
     options:{ maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{boxWidth:10,font:{size:10.5},color:getChartThemeColors().ink}}}, scales:{ x:{ticks:{font:{size:10},color:getChartThemeColors().soft}}, y:{ticks:{font:{size:10},color:getChartThemeColors().soft}} } }
   });
@@ -3282,6 +3314,7 @@ function toggleTheme() {
     localStorage.setItem('owncoin_theme', 'dark');
   }
   updateThemeButton();
+  if (typeof ocApplyPalette === 'function') ocApplyPalette();
   // volver a pintar la vista actual para que las gráficas usen los colores del nuevo tema
   if (App.db) renderView(App.currentView);
 }
@@ -3466,6 +3499,8 @@ async function renderConfiguracion() {
         <button class="btn ghost" onclick="toggleTheme(); renderConfiguracion();">Cambiar a ${isDark?'claro':'oscuro'}</button>
       </div>
     </div>
+
+    ${ocPaletteCard()}
 
     <div class="card">
       <div style="font-weight:600;font-size:13.5px;">Tamaño de letra</div>
@@ -3698,6 +3733,7 @@ function revealActivePill() {
 
 async function main() {
   pwaInit();
+  ocApplyPalette();
   try {
     await initSqlEngine();
   } catch (err) {
@@ -5575,7 +5611,7 @@ function tcmSaveCredit() {
    El mismo JSON sirve para descargarlo como respaldo y para guardarlo en
    un repositorio PRIVADO de GitHub mediante su API de contenidos.
    ===================================================================== */
-const OC_APP_VERSION = '7.0';
+const OC_APP_VERSION = '7.1';
 const BKP_FORMAT = 'owncoin-backup';
 
 /* ---------- JSON <-> base de datos ---------- */
@@ -6721,7 +6757,7 @@ function repMonthHtml(ym) {
 }
 function repMonthCharts(ym) {
   const { ink, soft, grid } = getChartThemeColors();
-  const palette = ['#c8973a','#3fb88a','#4c6ea8','#c1553d','#8a5fb0','#e3bf7c','#2a4d78','#a97a2b','#6fa3c7','#b55d8a'];
+  const palette = [ocCssVar('--gold-500')||'#c8973a','#3fb88a','#4c6ea8','#c1553d','#8a5fb0',ocCssVar('--gold-300')||'#e3bf7c',ocCssVar('--navy-600')||'#2a4d78','#a97a2b','#6fa3c7','#b55d8a'];
   const g = repByCategory(3, ym, ym).filter(p=>p.total>0);
   if (g.length) {
     const top = g.slice(0, 8), rest = g.slice(8).reduce((s,p)=>s+p.total, 0);
@@ -6749,7 +6785,7 @@ function repMonthCharts(ym) {
     __charts.budget = new Chart(b, { type:'bar',
       data:{ labels: rows.map(r=>ocSplitCode(r.name).name), datasets:[
         { label:'Presupuesto', data: rows.map(r=>r.amt/SCALE), backgroundColor:'#c9d3e0' },
-        { label:'Gastado', data: rows.map(r=>getCategoryMonthSpend(r.id, ym)/SCALE), backgroundColor:'#c8973a' } ] },
+        { label:'Gastado', data: rows.map(r=>getCategoryMonthSpend(r.id, ym)/SCALE), backgroundColor:ocCssVar('--gold-500')||'#c8973a' } ] },
       options:{ maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:ink } } }, scales:{ x:{ ticks:{ color:soft }, grid:{ display:false } }, y:{ ticks:{ color:soft }, grid:{ color:grid } } } } });
   }
 }
@@ -6819,11 +6855,62 @@ function repYearCharts(year) {
     { type:'bar', label:'Ingresos', data: months.map(cut(m=>m.ing)), backgroundColor:'#3fb88a', order:2 },
     { type:'bar', label:'Gastos', data: months.map(cut(m=>m.gas)), backgroundColor:'#c1553d', order:2 },
   ];
-  if (hasPrev) datasets.push({ type:'line', label:`Gastos ${year-1}`, data: prev.map(m=>m.gas), borderColor:'#c8973a', backgroundColor:'#c8973a', borderDash:[6,4], pointRadius:2, tension:.25, order:1 });
+  if (hasPrev) datasets.push({ type:'line', label:`Gastos ${year-1}`, data: prev.map(m=>m.gas), borderColor:ocCssVar('--gold-500')||'#c8973a', backgroundColor:ocCssVar('--gold-500')||'#c8973a', borderDash:[6,4], pointRadius:2, tension:.25, order:1 });
   __charts.year = new Chart(document.getElementById('chart-year'), {
     data:{ labels: OC_MES3, datasets },
     options:{ maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:ink, boxWidth:12 } } },
       scales:{ x:{ ticks:{ color:soft }, grid:{ display:false } }, y:{ ticks:{ color:soft }, grid:{ color:grid } } } } });
+}
+
+/* =====================================================================
+   TEMAS DE COLOR (v7.1)
+   Cada tema cambia el color principal (barra, encabezados) y el de acento
+   (botones, selección), con versión clara y oscura. El verde de ingresos y
+   el rojo de gastos y deuda no cambian. Se guarda en cada dispositivo.
+   ===================================================================== */
+const OC_PALETTES = [
+  { id:'azul',      name:'Azul y dorado', main:'#1e3a5f', acc:'#c8973a' },
+  { id:'esmeralda', name:'Esmeralda',     main:'#1a4d3f', acc:'#c8973a' },
+  { id:'vino',      name:'Vino',          main:'#651f33', acc:'#c9a074' },
+  { id:'oceano',    name:'Océano',        main:'#0f4d5c', acc:'#17a9a6' },
+  { id:'lavanda',   name:'Lavanda',       main:'#432663', acc:'#a888d6' },
+  { id:'grafito',   name:'Grafito',       main:'#343941', acc:'#e07b2e' },
+];
+function ocGetPalette() { const p = localStorage.getItem('owncoin_palette'); return OC_PALETTES.some(x=>x.id===p) ? p : 'azul'; }
+function ocCssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function ocApplyPalette() {
+  const p = ocGetPalette();
+  if (p === 'azul') document.documentElement.removeAttribute('data-palette'); else document.documentElement.setAttribute('data-palette', p);
+  if (localStorage.getItem('owncoin_amoled') === '1') document.documentElement.setAttribute('data-amoled', '1'); else document.documentElement.removeAttribute('data-amoled');
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', ocCssVar('--navy-900') || '#0f2038');
+}
+function ocSetPalette(id) {
+  try { localStorage.setItem('owncoin_palette', id); } catch(e) {}
+  ocApplyPalette();
+  if (App.db) renderView(App.currentView); else renderConfiguracion();
+  showToast(`Tema: ${(OC_PALETTES.find(p=>p.id===id)||{}).name}.`, 'success');
+}
+function ocSetAmoled(on) {
+  try { localStorage.setItem('owncoin_amoled', on ? '1' : '0'); } catch(e) {}
+  ocApplyPalette();
+  if (on && document.documentElement.getAttribute('data-theme') !== 'dark') toggleTheme();
+  else if (App.db) renderView(App.currentView);
+}
+function ocPaletteCard() {
+  const cur = ocGetPalette(), amoled = localStorage.getItem('owncoin_amoled') === '1';
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  return `<div class="card">
+    <div style="font-weight:600;font-size:13.5px;">Color de la app</div>
+    <div class="hint" style="margin-bottom:12px;">Cambia el color principal y el de acento. Cada tema tiene versión clara y oscura; los colores de ingresos y gastos se mantienen.</div>
+    <div class="pal-grid" role="radiogroup" aria-label="Color de la app">
+      ${OC_PALETTES.map(p=>`<button type="button" class="pal-opt ${p.id===cur?'active':''}" role="radio" aria-checked="${p.id===cur}" onclick="ocSetPalette('${p.id}')">
+        <span class="pal-sw" aria-hidden="true"><span style="background:${p.main}"></span><span style="background:${p.acc}"></span></span>
+        <span class="pal-name">${p.name}</span>${p.id===cur?'<span class="pal-check" aria-hidden="true">✓</span>':''}</button>`).join('')}
+    </div>
+    <label class="tci-check" style="margin-top:14px;"><input type="checkbox" ${amoled?'checked':''} onchange="ocSetAmoled(this.checked)"> Negro puro en modo oscuro</label>
+    <div class="hint">Fondo totalmente negro: ideal para pantallas AMOLED, ahorra batería y descansa la vista de noche.${amoled && !isDark ? ' Se nota al activar el modo oscuro.' : ''}</div>
+  </div>`;
 }
 
 main();
