@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>🪙 OWNCOIN v6.5 — Gestor Financiero Personal</title>
+<title>🪙 OWNCOIN v7.0 — Gestor Financiero Personal</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -960,6 +960,26 @@ html[data-theme="dark"] .catpick-ic.acc{ background:rgba(200,151,58,.15); color:
 .filters-bar .filt-acc, .filters-bar .filt-cat{ min-width:200px; flex:1; }
 .cat-newgroup{ display:inline-block; margin-top:6px; font-size:12px; font-weight:700; color:var(--navy-700); background:none; border:none; padding:0; cursor:pointer; text-decoration:underline; font-family:var(--font-body); }
 html[data-theme="dark"] .cat-newgroup{ color:var(--gold-300); }
+
+/* ---------- v7.0: Reportes por período ---------- */
+.rep-bar{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+.rep-mode{ width:auto; min-width:180px; margin:0; }
+.rep-nav{ margin:0; }
+.rep-label{ font-family:var(--font-display); font-weight:700; font-size:17px; color:var(--heading); min-width:150px; text-align:center; }
+.tcm-arrow:disabled{ opacity:.35; cursor:default; }
+.rep-delta{ font-weight:700; color:var(--ink-soft); }
+.rep-delta.good{ color:var(--ok); } .rep-delta.bad{ color:var(--danger); }
+.rep-cat .rep-parent td, .tcm-table .rep-parent td{ font-weight:700; background:var(--bg); }
+.tcm-table tr.rep-child{ cursor:pointer; }
+.tcm-table tr.rep-child:hover td, .tcm-table tr.rep-child:focus-visible td{ background:var(--hover-bg); outline:none; }
+.rep-cat .rep-child td:first-child{ padding-left:16px; }
+.rep-ic{ font-size:16px; vertical-align:-3px; margin-right:6px; color:var(--gold-600); }
+.rep-code{ color:var(--gold-600); }
+tr.rep-future td{ color:var(--ink-soft); }
+.rep-cmp td small{ display:block; font-size:10.5px; color:var(--ink-soft); font-weight:500; }
+.rep-cat td, .rep-cmp td{ font-size:12.5px; }
+.txn-more{ display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin:14px 0 4px; }
+@media(max-width:560px){ .rep-bar{ flex-direction:column; align-items:stretch; } .rep-nav{ justify-content:center; } .rep-mode{ width:100%; } }
 </style>
 </head>
 <script>
@@ -980,7 +1000,7 @@ html[data-theme="dark"] .cat-newgroup{ color:var(--gold-300); }
 <!-- ===================== LANDING (choose DB source) ===================== -->
 <div id="landing">
   <div class="landing-card">
-    <div class="landing-mark">🪙 OWNCOIN <span style="color:var(--gold-600);">v6.5</span><span class="digits">Gestor financiero personal</span></div>
+    <div class="landing-mark">🪙 OWNCOIN <span style="color:var(--gold-600);">v7.0</span><span class="digits">Gestor financiero personal</span></div>
     <p class="landing-sub">Tus cuentas, tarjetas y presupuestos en un solo lugar, con respaldos en JSON y sincronización con tu GitHub privado.</p>
     <div class="landing-options">
       <div class="landing-opt" id="opt-new">
@@ -1009,7 +1029,7 @@ html[data-theme="dark"] .cat-newgroup{ color:var(--gold-300); }
   <div class="app-brand">
     <div class="mark">🪙</div>
     <div style="min-width:0;">
-      <div class="name">OWNCOIN <small>v6.5</small></div>
+      <div class="name">OWNCOIN <small>v7.0</small></div>
       <div class="tag" id="brand-filename">sin archivo</div>
       <div class="tag" id="autosave-indicator" style="color:#a9d6bb;">—</div>
     </div>
@@ -1518,7 +1538,7 @@ function __legacyExportFydbUnused() {
   const blob = new Blob([data], { type: 'application/octet-stream' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  const stamp = new Date().toISOString().slice(0,10);
+  const stamp = ocLocalDay();
   a.href = url;
   a.download = (App.fileName && App.fileName.endsWith('.fydb')) ? App.fileName : `owncoin_backup_${stamp}.fydb`;
   document.body.appendChild(a);
@@ -1542,7 +1562,7 @@ function dateToDbStr(dateInputVal, timeVal) {
   return `${dateInputVal} ${time}:00.000`;
 }
 function dbStrToDateInput(s) {
-  if (!s) return { date: new Date().toISOString().slice(0,10), time:'12:00' };
+  if (!s) return { date: ocLocalDay(), time:'12:00' };
   const [datePart, timePart] = s.split(' ');
   return { date: datePart, time: (timePart||'12:00').slice(0,5) };
 }
@@ -1891,8 +1911,12 @@ function getTransactions(filters={}) {
   if (filters.from) { sql += ' AND tr.date >= ?'; params.push(filters.from + ' 00:00:00.000'); }
   if (filters.to) { sql += ' AND tr.date <= ?'; params.push(filters.to + ' 23:59:59.999'); }
   if (filters.search) { sql += ' AND (tr.notes LIKE ? OR i.itemName LIKE ?)'; params.push('%'+filters.search+'%', '%'+filters.search+'%'); }
-  sql += ' ORDER BY tr.date DESC, tr.transactionsTableID DESC LIMIT 500';
-  return dbAll(sql, params);
+  const total = dbOne(`SELECT COUNT(*) n FROM (${sql})`, params).n;
+  const lim = Math.max(1, Number(filters.__limit) || 500);
+  sql += ` ORDER BY tr.date DESC, tr.transactionsTableID DESC LIMIT ${lim}`;
+  const rows = dbAll(sql, params);
+  rows.total = total;
+  return rows;
 }
 
 /* =====================================================================
@@ -1961,7 +1985,7 @@ function getMonthsList(n) {
   const now = new Date();
   for (let i=n-1;i>=0;i--){
     const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
-    months.push(d.toISOString().slice(0,7));
+    months.push(ocLocalYM(d));
   }
   return months;
 }
@@ -2014,7 +2038,7 @@ function computeNetProfitSeries(months, accountId) {
 function computeDailySummarySeries() {
   const days = [];
   const now = new Date();
-  for (let i=6;i>=0;i--){ const d=new Date(now); d.setDate(now.getDate()-i); days.push(d.toISOString().slice(0,10)); }
+  for (let i=6;i>=0;i--){ const d=new Date(now); d.setDate(now.getDate()-i); days.push(ocLocalDay(d)); }
   return days.map(day=>{
     const r = dbOne(`SELECT COALESCE(SUM(-amount),0) as gasto FROM TRANSACTIONSTABLE WHERE deletedTransaction=6 AND transactionTypeID=3 AND substr(date,1,10)=?`, [day]);
     return { day, gasto: r.gasto };
@@ -2022,7 +2046,7 @@ function computeDailySummarySeries() {
 }
 function computeAvgSpend(daysN) {
   const from = new Date(); from.setDate(from.getDate()-(daysN-1));
-  const fromStr = from.toISOString().slice(0,10);
+  const fromStr = ocLocalDay(from);
   const r = dbOne(`SELECT COALESCE(SUM(-amount),0) as gasto FROM TRANSACTIONSTABLE WHERE deletedTransaction=6 AND transactionTypeID=3 AND substr(date,1,10)>=?`, [fromStr]);
   return r.gasto / daysN;
 }
@@ -2054,7 +2078,7 @@ function computeCalendarDots(ym) {
    ===================================================================== */
 function renderDashboard() {
   if (!App.dashCfg) App.dashCfg = { months: 6, account: '' };
-  if (!App.calMonth) App.calMonth = new Date().toISOString().slice(0,7);
+  if (!App.calMonth) App.calMonth = ocLocalYM();
 
   const el = document.getElementById('view-dashboard');
   el.innerHTML = `
@@ -2129,7 +2153,7 @@ function openWidgetConfig(key) {
     title = 'Resumen del presupuesto';
     fieldsHtml = `
       <div class="field"><label>Cuenta</label><select id="wcfg-account"><option value="">Todas las cuentas</option>${accounts.map(a=>`<option value="${a.accountsTableID}" ${cfg.account==a.accountsTableID?'selected':''}>${accountDisplayLabel(a)}</option>`).join('')}</select></div>
-      <div class="field"><label>Mes</label><input type="month" id="wcfg-month" value="${cfg.month || new Date().toISOString().slice(0,7)}"></div>`;
+      <div class="field"><label>Mes</label><input type="month" id="wcfg-month" value="${cfg.month || ocLocalYM()}"></div>`;
   } else if (key==='favaccounts') {
     title = 'Cuentas favoritas';
     fieldsHtml = `<div class="field"><label>Cantidad de cuentas a mostrar</label><select id="wcfg-count">${[4,6,8,12,20].map(n=>`<option value="${n}" ${cfg.count==n?'selected':''}>${n}</option>`).join('')}</select></div>`;
@@ -2180,7 +2204,7 @@ function renderNetWorthWidget() {
   `, 'networth'));
   __charts.dashNetWorth = new Chart(document.getElementById('chart-dash-networth'), {
     type:'line',
-    data:{ labels: months.map(monthLabel), datasets:[
+    data:{ labels: ocMonthLabels(months), datasets:[
       { label:'Activos', data: series.map(s=>s.activos/SCALE), borderColor:'#2f7d4f', backgroundColor:'#2f7d4f', tension:.25 },
       { label:'Pasivos', data: series.map(s=>s.pasivos/SCALE), borderColor:'#b23b3b', backgroundColor:'#b23b3b', tension:.25 },
       { label:'Patrimonio neto', data: series.map(s=>s.neto/SCALE), borderColor:'#2a4d78', backgroundColor:'#2a4d78', tension:.25 },
@@ -2229,7 +2253,7 @@ function renderCashFlowWidget() {
   `, 'cashflow'));
   __charts.dashCashFlow = new Chart(document.getElementById('chart-dash-cashflow'), {
     type:'bar',
-    data:{ labels: months.map(monthLabel), datasets:[
+    data:{ labels: ocMonthLabels(months), datasets:[
       { label:'Salida', data: series.map(s=>Math.abs(s.salida)/SCALE), backgroundColor:'#c1553d' },
       { label:'Entrada', data: series.map(s=>s.entrada/SCALE), backgroundColor:'#3fb88a' },
     ]},
@@ -2255,7 +2279,7 @@ function renderNetProfitWidget() {
   `, 'netprofit'));
   __charts.dashNetProfit = new Chart(document.getElementById('chart-dash-netprofit'), {
     type:'bar',
-    data:{ labels: months.map(monthLabel), datasets:[
+    data:{ labels: ocMonthLabels(months), datasets:[
       { label:'Gastos', data: series.map(s=>Math.abs(s.gasto)/SCALE), backgroundColor:'#c1553d' },
       { label:'Ingresos', data: series.map(s=>s.ingreso/SCALE), backgroundColor:'#3fb88a' },
     ]},
@@ -2298,7 +2322,7 @@ function renderDailySummaryWidget() {
 
 /* --- Resumen del presupuesto --- */
 function renderBudgetSummaryWidget() {
-  const cfg = getWidgetCfg('budget', { account: '', month: new Date().toISOString().slice(0,7) });
+  const cfg = getWidgetCfg('budget', { account: '', month: ocLocalYM() });
   const data = computeBudgetSummaryData(cfg.month, cfg.account);
   const total = data.reduce((s,r)=>s+r.total,0);
   const top = data.slice(0,6);
@@ -2377,7 +2401,7 @@ function renderCalendarWidget() {
 function shiftCalMonth(delta) {
   const [y,m] = App.calMonth.split('-').map(Number);
   const d = new Date(y, m-1+delta, 1);
-  App.calMonth = d.toISOString().slice(0,7);
+  App.calMonth = ocLocalYM(d);
   renderDashboard();
 }
 function jumpToDayTxns(dayStr) {
@@ -2657,7 +2681,7 @@ function confirmDeleteAccount(id) {
 function renderTransacciones() {
   const accounts = getAccounts(false);
   const categories = getChildCategories();
-  const txns = getTransactions(App.txnFilters);
+  const txns = getTransactions(Object.assign({}, App.txnFilters, { __limit: App.txnLimit || 500 }));
   const runningMap = computeRunningBalanceMap();
   const el = document.getElementById('view-transacciones');
   const dayGroups = groupTxnsByDay(txns);
@@ -2685,7 +2709,9 @@ function renderTransacciones() {
     </div>
     </details>
     ${dayGroups.length ? dayGroups.map(g=>renderTxnDayGroup(g, runningMap)).join('') : `<div class="empty-state"><div class="glyph">≡</div><p>No hay transacciones que coincidan.</p></div>`}
-    ${dayGroups.length ? `<p class="faint" style="margin-top:10px;">Mostrando hasta 500 movimientos más recientes.</p>` : ''}
+    ${dayGroups.length ? `<div class="txn-more"><span class="faint">Mostrando ${txns.length.toLocaleString('es-SV')} de ${txns.total.toLocaleString('es-SV')} movimientos${(App.txnFilters.account||App.txnFilters.category||App.txnFilters.type||App.txnFilters.from||App.txnFilters.to||App.txnFilters.search)?' que coinciden':''}.</span>
+      ${txns.total > txns.length ? `<button class="btn small" onclick="App.txnLimit=(App.txnLimit||500)+500; refreshAfterChange()">Cargar ${Math.min(500, txns.total - txns.length)} más</button>
+        <button class="btn small ghost" onclick="App.txnLimit=${txns.total}; refreshAfterChange()">Ver todos</button>` : ''}</div>` : ''}
   `;
 }
 function groupTxnsByDay(txns) {
@@ -2768,10 +2794,12 @@ function applyTxnFilters() {
     to: document.getElementById('filt-to').value,
     search: document.getElementById('filt-search').value,
   };
+  App.txnLimit = 500;
   renderTransacciones();
 }
 function clearTxnFilters() {
   App.txnFilters = { account:'', category:'', type:'', search:'', from:'', to:'' };
+  App.txnLimit = 500;
   renderTransacciones();
 }
 function doDeleteTxn(id) {
@@ -3097,7 +3125,7 @@ function submitTxnForm() {
    ===================================================================== */
 function renderCategorias() {
   const parents = getParentCategories();
-  const ym = new Date().toISOString().slice(0,7);
+  const ym = ocLocalYM();
   const el = document.getElementById('view-categorias');
   if (!parents.length) {
     el.innerHTML = `<div class="empty-state"><div class="glyph">◫</div><p>No hay categorías todavía.</p></div>`;
@@ -3265,7 +3293,7 @@ function updateThemeButton() {
   btn.title = isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
 }
 
-function renderReportes() {
+function __legacyRenderReportes() {
   const el = document.getElementById('view-reportes');
   el.innerHTML = `
     <div id="reportes-warning"></div>
@@ -3281,7 +3309,7 @@ function renderReportes() {
     return;
   }
   destroyCharts();
-  const ym = new Date().toISOString().slice(0,7);
+  const ym = ocLocalYM();
   const { ink: inkColor, soft: softColor, grid: gridColor } = getChartThemeColors();
   const palette = ['#c8973a','#3fb88a','#4c6ea8','#c1553d','#8a5fb0','#e3bf7c','#2a4d78','#a97a2b'];
 
@@ -3325,7 +3353,7 @@ function renderReportes() {
     const trendMap = {}; trendRows.forEach(r=>trendMap[r.ym]=r);
     __charts.trend = new Chart(document.getElementById('chart-trend'), {
       type:'bar',
-      data:{ labels: months.map(monthLabel), datasets:[
+      data:{ labels: ocMonthLabels(months), datasets:[
         { label:'Ingresos', data: months.map(m=>(trendMap[m]?trendMap[m].ingreso:0)/SCALE), backgroundColor:'#3fb88a' },
         { label:'Gastos', data: months.map(m=>(trendMap[m]?trendMap[m].gasto:0)/SCALE), backgroundColor:'#c1553d' },
       ]},
@@ -3985,7 +4013,7 @@ function tciLearnFromHistory() {
 function tciBuildPlan() {
   const S = window.__tci;
   const linked = tciLinkedKeys();
-  const today = new Date().toISOString().slice(0,10);
+  const today = ocLocalDay();
   const cardsById = {}; S.data.cards.forEach(c=>cardsById[c.id]=c);
   const usedDup = new Set();
   const items = [];
@@ -4234,7 +4262,7 @@ function tciDownloadFixed() {
   const blob = new Blob([JSON.stringify(copy, null, 2)], { type:'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `tarjetas_corregido_${new Date().toISOString().slice(0,10)}.json`;
+  a.download = `tarjetas_corregido_${ocLocalDay()}.json`;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
   showToast('JSON corregido descargado. Impórtalo en TC-CONTROL con “Cargar JSON”.', 'success');
@@ -5547,7 +5575,7 @@ function tcmSaveCredit() {
    El mismo JSON sirve para descargarlo como respaldo y para guardarlo en
    un repositorio PRIVADO de GitHub mediante su API de contenidos.
    ===================================================================== */
-const OC_APP_VERSION = '6.5';
+const OC_APP_VERSION = '7.0';
 const BKP_FORMAT = 'owncoin-backup';
 
 /* ---------- JSON <-> base de datos ---------- */
@@ -6495,6 +6523,307 @@ function ocSaveParent() {
   closeModal(); showToast(`Grupo “${full}” creado. Agrégale una subcategoría.`, 'success');
   refreshAfterChange();
   openCategoryModal(null, pid);
+}
+
+/* =====================================================================
+   FECHAS EN HORA LOCAL (v7.0)
+   toISOString() usa hora universal: en El Salvador (UTC-6) cambiaba de día
+   a las 6:00 p. m. Estas funciones usan siempre la hora del dispositivo.
+   ===================================================================== */
+const OC_MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const OC_MES3 = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function ocPad2(n) { return String(n).padStart(2, '0'); }
+function ocLocalDay(d) { d = d || new Date(); return `${d.getFullYear()}-${ocPad2(d.getMonth()+1)}-${ocPad2(d.getDate())}`; }
+function ocLocalYM(d) { return ocLocalDay(d).slice(0, 7); }
+function ocYMAdd(ym, n) {
+  let y = Number(ym.slice(0,4)), m = Number(ym.slice(5,7)) + n;
+  while (m > 12) { m -= 12; y++; } while (m < 1) { m += 12; y--; }
+  return `${y}-${ocPad2(m)}`;
+}
+/* Los últimos n meses terminando en endYM (por defecto el mes actual), sin saltos ni repeticiones */
+function ocMonthsBack(n, endYM) {
+  const end = endYM || ocLocalYM(); const out = [];
+  for (let i = n-1; i >= 0; i--) out.push(ocYMAdd(end, -i));
+  return out;
+}
+/* "ene", o "ene 27" cuando la serie cruza de un año a otro */
+function ocMonthLabels(list) {
+  const multi = new Set(list.map(m=>m.slice(0,4))).size > 1;
+  return list.map(m=>OC_MES3[Number(m.slice(5,7))-1] + (multi ? ' ' + m.slice(2,4) : ''));
+}
+function ocYMLabel(ym) { return `${OC_MESES[Number(ym.slice(5,7))-1].replace(/^./, c=>c.toUpperCase())} ${ym.slice(0,4)}`; }
+
+/* =====================================================================
+   REPORTES POR PERÍODO (v7.0): mes o año, con comparaciones
+   ===================================================================== */
+function repState() {
+  if (!App.rep) App.rep = { mode:'mes', ym: ocLocalYM(), year: Number(ocLocalYM().slice(0,4)) };
+  return App.rep;
+}
+function repYears() {
+  const r = dbOne(`SELECT MIN(substr(date,1,4)) a, MAX(substr(date,1,4)) b FROM TRANSACTIONSTABLE WHERE deletedTransaction=6 AND transactionTypeID IN (3,4)`);
+  const now = Number(ocLocalYM().slice(0,4));
+  const a = r && r.a ? Math.min(Number(r.a), now) : now, b = r && r.b ? Math.max(Number(r.b), now) : now;
+  const out = []; for (let y = a; y <= b; y++) out.push(y); return out;
+}
+/* Totales de ingresos y gastos (netos: una devolución resta del gasto) en un rango de meses [desde, hasta] */
+function repTotals(fromYM, toYM) {
+  const r = dbOne(`SELECT
+      COALESCE(SUM(CASE WHEN transactionTypeID=4 THEN amount ELSE 0 END),0) ing,
+      COALESCE(SUM(CASE WHEN transactionTypeID=3 THEN -amount ELSE 0 END),0) gas
+    FROM TRANSACTIONSTABLE WHERE deletedTransaction=6 AND transactionTypeID IN (3,4)
+      AND substr(date,1,7) >= ? AND substr(date,1,7) <= ?`, [fromYM, toYM]);
+  const ing = r.ing/SCALE, gas = r.gas/SCALE;
+  return { ing, gas, neto: ing-gas, ahorro: ing>0 ? (ing-gas)/ing*100 : null };
+}
+function repMonthly(year) {
+  const rows = dbAll(`SELECT substr(date,1,7) ym,
+      SUM(CASE WHEN transactionTypeID=4 THEN amount ELSE 0 END) ing,
+      SUM(CASE WHEN transactionTypeID=3 THEN -amount ELSE 0 END) gas
+    FROM TRANSACTIONSTABLE WHERE deletedTransaction=6 AND transactionTypeID IN (3,4) AND substr(date,1,4)=?
+    GROUP BY ym`, [String(year)]);
+  const m = {}; rows.forEach(r=>m[r.ym] = { ing:r.ing/SCALE, gas:r.gas/SCALE });
+  return Array.from({ length:12 }, (_, i)=>{ const ym = `${year}-${ocPad2(i+1)}`; const v = m[ym] || { ing:0, gas:0 }; return { ym, ing:v.ing, gas:v.gas, neto:v.ing-v.gas }; });
+}
+/* Por categoría (agrupado por grupo padre) para un tipo (3 gasto, 4 ingreso) y rango */
+function repByCategory(type, fromYM, toYM) {
+  const sign = type === 3 ? -1 : 1;
+  const rows = dbAll(`SELECT tr.categoryID id, c.childCategoryName name, c.childCategoryIcon icon, p.parentCategoryTableID pid, p.parentCategoryName parent,
+      SUM(tr.amount) s, COUNT(*) n
+    FROM TRANSACTIONSTABLE tr
+    LEFT JOIN CHILDCATEGORYTABLE c ON c.categoryTableID = tr.categoryID
+    LEFT JOIN PARENTCATEGORYTABLE p ON p.parentCategoryTableID = c.parentCategoryID
+    WHERE tr.deletedTransaction=6 AND tr.transactionTypeID=? AND substr(tr.date,1,7) >= ? AND substr(tr.date,1,7) <= ?
+    GROUP BY tr.categoryID`, [type, fromYM, toYM]);
+  const parents = {};
+  rows.forEach(r=>{
+    const v = sign * r.s / SCALE;
+    const key = r.pid != null ? r.pid : 'x';
+    if (!parents[key]) parents[key] = { pid:r.pid, name:r.parent || '(sin grupo)', total:0, n:0, children:[] };
+    parents[key].total += v; parents[key].n += r.n;
+    parents[key].children.push({ id:r.id, name:r.name || '(sin categoría)', icon:r.icon, total:v, n:r.n });
+  });
+  const list = Object.values(parents).filter(p=>Math.abs(p.total) > 0.004).sort((a,b)=>b.total-a.total);
+  list.forEach(p=>p.children.sort((a,b)=>b.total-a.total));
+  return list;
+}
+function repPct(a, b) { if (!b) return null; return (a-b)/Math.abs(b)*100; }
+/* Variación contra un período anterior; `vs` describe ese período ("vs mes anterior") */
+function repDelta(cur, prev, goodWhenUp, vs) {
+  const p = repPct(cur, prev);
+  if (p === null || !isFinite(p)) return `<span class="rep-delta">sin datos ${vs ? escapeHtml(vs.replace(/^vs /,'de ')) : 'previos'}</span>`;
+  const up = p >= 0, good = goodWhenUp ? up : !up;
+  return `<span class="rep-delta ${Math.abs(p)<0.5?'':(good?'good':'bad')}">${up?'▲':'▼'} ${Math.abs(p).toFixed(1)}%</span>${vs ? ' ' + escapeHtml(vs) : ''}`;
+}
+const repMoney = v => fmtMoney(Math.round(Math.abs(v)*SCALE), 'USD');
+const repSigned = v => `${v<0?'– ':''}${repMoney(v)}`;
+const repT = v => `${v<0?'– ':''}$${Math.abs(v).toLocaleString('es-SV', { minimumFractionDigits:2, maximumFractionDigits:2 })}`;
+
+function repGo(dir) {
+  const S = repState();
+  if (S.mode === 'mes') S.ym = ocYMAdd(S.ym, dir);
+  else { const ys = repYears(); S.year = Math.min(ys[ys.length-1], Math.max(ys[0], S.year + dir)); }
+  renderReportes();
+}
+function repSetMode(m) {
+  const S = repState(); S.mode = m;
+  if (m === 'anio') S.year = Number(S.ym.slice(0,4));
+  renderReportes();
+}
+function repToday() { const S = repState(); S.ym = ocLocalYM(); S.year = Number(S.ym.slice(0,4)); renderReportes(); }
+function repOpenMonth(ym) { const S = repState(); S.mode = 'mes'; S.ym = ym; renderReportes(); window.scrollTo({ top:0 }); }
+/* Ver los movimientos de una categoría dentro del período del reporte */
+function repViewCategory(id, fromYM, toYM) {
+  const last = new Date(Number(toYM.slice(0,4)), Number(toYM.slice(5,7)), 0).getDate();
+  App.txnFilters = { account:'', category: id==null ? '' : String(id), type:'', from: fromYM+'-01', to: `${toYM}-${ocPad2(last)}`, search:'' };
+  App.txnLimit = 500; App.filtersOpen = true;
+  switchView('transacciones');
+}
+
+function repChildLabel(c, p) {
+  const parts = ocCatParts({ childCategoryName:c.name, parentCategoryName:p.name });
+  return (parts.tail ? `<b class="rep-code">${escapeHtml(parts.tail)}</b> ` : '') + escapeHtml(parts.name);
+}
+function repCategoryTable(list, total, fromYM, toYM, opts={}) {
+  if (!list.length) return `<p class="hint">Sin movimientos en este período.</p>`;
+  const prevMap = opts.prev || null;
+  return `<div class="table-scroll"><table class="tcm-table rep-cat">
+    <thead><tr><th>Categoría</th><th class="n">Total</th><th class="n">%</th>${opts.avg?'<th class="n">Prom. mensual</th>':''}${prevMap?'<th class="n">Año anterior</th>':''}</tr></thead>
+    <tbody>${list.map(p=>`
+      <tr class="rep-parent"><td>${escapeHtml(p.name)}</td><td class="n">${repT(p.total)}</td><td class="n">${total?(p.total/total*100).toFixed(1):'0.0'}%</td>${opts.avg?`<td class="n">${repT(p.total/opts.avg)}</td>`:''}${prevMap?`<td class="n">${prevMap[p.pid]!=null?repT(prevMap[p.pid]):'—'}</td>`:''}</tr>
+      ${p.children.map(c=>`<tr class="rep-child" tabindex="0" role="button" onclick="repViewCategory(${c.id==null?'null':c.id}, '${fromYM}', '${toYM}')" onkeydown="if(event.key==='Enter')this.click()" title="Ver estos movimientos">
+        <td><span class="msi rep-ic" aria-hidden="true">${getCategoryIconLigature({ childCategoryIcon:c.icon })}</span>${repChildLabel(c, p)} <span class="faint">· ${c.n}</span></td>
+        <td class="n">${repT(c.total)}</td><td class="n">${total?(c.total/total*100).toFixed(1):'0.0'}%</td>${opts.avg?`<td class="n">${repT(c.total/opts.avg)}</td>`:''}${prevMap?'<td></td>':''}</tr>`).join('')}`).join('')}
+      <tr class="tot"><td>Total</td><td class="n">${repT(total)}</td><td class="n">100%</td>${opts.avg?`<td class="n">${repT(total/opts.avg)}</td>`:''}${prevMap?`<td class="n">${repT(Object.values(prevMap).reduce((s,v)=>s+v,0))}</td>`:''}</tr>
+    </tbody></table></div>`;
+}
+
+function renderReportes() {
+  const el = document.getElementById('view-reportes');
+  const S = repState();
+  destroyCharts();
+  const isMes = S.mode === 'mes';
+  const label = isMes ? ocYMLabel(S.ym) : `Año ${S.year}`;
+  const isNow = isMes ? S.ym === ocLocalYM() : S.year === Number(ocLocalYM().slice(0,4));
+  const ys = repYears();
+  const canPrev = isMes || S.year > ys[0], canNext = isMes || S.year < ys[ys.length-1];
+  const head = `<div class="rep-bar">
+      <div class="type-toggle rep-mode" role="group" aria-label="Tipo de reporte">
+        <button type="button" class="${isMes?'active':''}" onclick="repSetMode('mes')">Mes</button>
+        <button type="button" class="${!isMes?'active':''}" onclick="repSetMode('anio')">Año</button>
+      </div>
+      <div class="tcm-stmtbar rep-nav">
+        <button class="tcm-arrow" aria-label="Período anterior" ${canPrev?'':'disabled'} onclick="repGo(-1)">‹</button>
+        <div class="rep-label">${label}</div>
+        <button class="tcm-arrow" aria-label="Período siguiente" ${canNext?'':'disabled'} onclick="repGo(1)">›</button>
+        ${isNow?'':`<button class="btn ghost small" onclick="repToday()">Hoy</button>`}
+      </div></div>
+    <div id="reportes-warning"></div>`;
+  el.innerHTML = head + (isMes ? repMonthHtml(S.ym) : repYearHtml(S.year));
+  if (typeof Chart === 'undefined') {
+    document.getElementById('reportes-warning').innerHTML = `<div class="card" style="border-left:4px solid var(--danger);"><p style="margin:0;"><strong>Las gráficas no se pudieron cargar</strong> (sin conexión la primera vez). Las tablas siguen disponibles.</p></div>`;
+    el.querySelectorAll('canvas').forEach(c=>{ const card = c.closest('.card'); if (card) card.remove(); });
+    return;
+  }
+  try { isMes ? repMonthCharts(S.ym) : repYearCharts(S.year); } catch (err) { console.error('reportes:', err); }
+}
+
+/* ---------- vista mensual ---------- */
+function repMonthHtml(ym) {
+  const cur = repTotals(ym, ym), prev = repTotals(ocYMAdd(ym,-1), ocYMAdd(ym,-1)), ly = repTotals(ocYMAdd(ym,-12), ocYMAdd(ym,-12));
+  const gastos = repByCategory(3, ym, ym), ingresos = repByCategory(4, ym, ym);
+  const hasBudget = !!dbOne(`SELECT 1 x FROM CHILDCATEGORYTABLE WHERE budgetEnabledCategoryChild=1 LIMIT 1`);
+  return `
+    <div class="grid cols-4 tcm-kpis">
+      <div class="card stat"><div class="label">Ingresos</div><div class="value pos">${repMoney(cur.ing)}</div><div class="foot">${repDelta(cur.ing, prev.ing, true, 'vs mes anterior')}</div></div>
+      <div class="card stat"><div class="label">Gastos</div><div class="value neg">${repMoney(cur.gas)}</div><div class="foot">${repDelta(cur.gas, prev.gas, false, 'vs mes anterior')}</div></div>
+      <div class="card stat"><div class="label">Neto</div><div class="value ${cur.neto<0?'neg':'pos'}">${repSigned(cur.neto)}</div><div class="foot">ingresos menos gastos</div></div>
+      <div class="card stat"><div class="label">Ahorro</div><div class="value">${cur.ahorro==null?'—':cur.ahorro.toFixed(1)+'%'}</div><div class="foot">del ingreso del mes</div></div>
+    </div>
+    <div class="card"><div class="section-heading" style="margin-top:0;"><h3>Comparación</h3></div>
+      <div class="table-scroll"><table class="tcm-table rep-cmp">
+        <thead><tr><th>Período</th><th class="n">Ingresos</th><th class="n">Gastos</th><th class="n">Neto</th></tr></thead>
+        <tbody>
+          <tr class="rep-parent"><td>Este mes<small>${ocYMLabel(ym)}</small></td><td class="n">${repT(cur.ing)}</td><td class="n">${repT(cur.gas)}</td><td class="n">${repT(cur.neto)}</td></tr>
+          <tr class="rep-child" role="button" tabindex="0" onclick="repOpenMonth('${ocYMAdd(ym,-1)}')" onkeydown="if(event.key==='Enter')this.click()"><td>Mes anterior<small>${ocYMLabel(ocYMAdd(ym,-1))}</small></td><td class="n">${repT(prev.ing)}</td><td class="n">${repT(prev.gas)}</td><td class="n">${repT(prev.neto)}</td></tr>
+          <tr class="rep-child" role="button" tabindex="0" onclick="repOpenMonth('${ocYMAdd(ym,-12)}')" onkeydown="if(event.key==='Enter')this.click()"><td>Hace un año<small>${ocYMLabel(ocYMAdd(ym,-12))}</small></td><td class="n">${repT(ly.ing)}</td><td class="n">${repT(ly.gas)}</td><td class="n">${repT(ly.neto)}</td></tr>
+        </tbody></table></div></div>
+    <div class="grid cols-2">
+      <div class="card"><div class="section-heading" style="margin-top:0;"><h3>Gastos por grupo</h3></div><div style="height:240px;position:relative;"><canvas id="chart-cat" aria-label="Gastos por grupo"></canvas></div></div>
+      <div class="card"><div class="section-heading" style="margin-top:0;"><h3>Saldos al cierre del mes</h3></div><div style="height:240px;position:relative;"><canvas id="chart-accounts" aria-label="Saldos por cuenta"></canvas></div></div>
+    </div>
+    <div class="card"><div class="section-heading" style="margin-top:0;"><h3>Gastos por categoría</h3></div>
+      <p class="hint" style="margin-top:0;">Toca una categoría para ver sus movimientos de este mes.</p>
+      ${repCategoryTable(gastos, cur.gas, ym, ym)}</div>
+    <div class="card"><div class="section-heading" style="margin-top:0;"><h3>Ingresos por categoría</h3></div>${repCategoryTable(ingresos, cur.ing, ym, ym)}</div>
+    <div class="card"><div class="section-heading" style="margin-top:0;"><h3>Presupuesto vs. real</h3></div>
+      ${hasBudget ? `<div style="height:220px;position:relative;"><canvas id="chart-budget"></canvas></div>` : `<p class="faint">Asigna presupuestos a tus categorías para ver esta comparación.</p>`}</div>`;
+}
+function repMonthCharts(ym) {
+  const { ink, soft, grid } = getChartThemeColors();
+  const palette = ['#c8973a','#3fb88a','#4c6ea8','#c1553d','#8a5fb0','#e3bf7c','#2a4d78','#a97a2b','#6fa3c7','#b55d8a'];
+  const g = repByCategory(3, ym, ym).filter(p=>p.total>0);
+  if (g.length) {
+    const top = g.slice(0, 8), rest = g.slice(8).reduce((s,p)=>s+p.total, 0);
+    const labels = top.map(p=>ocSplitCode(p.name).name).concat(rest>0?['Otros grupos']:[]);
+    const data = top.map(p=>p.total).concat(rest>0?[rest]:[]);
+    __charts.cat = new Chart(document.getElementById('chart-cat'), { type:'doughnut',
+      data:{ labels, datasets:[{ data, backgroundColor:palette }] },
+      options:{ maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ color:ink, font:{ size:11 }, boxWidth:12 } } } } });
+  } else document.getElementById('chart-cat').parentElement.innerHTML = '<p class="faint">Sin gastos este mes.</p>';
+  const accounts = getAccounts(false);
+  const bal = {};
+  dbAll(`SELECT accountID, SUM(amount) s FROM TRANSACTIONSTABLE WHERE deletedTransaction=6 AND substr(date,1,7) <= ? GROUP BY accountID`, [ym]).forEach(r=>bal[r.accountID] = r.s/SCALE);
+  const accs = accounts.filter(a=>Math.abs(bal[a.accountsTableID]||0) > 0.004);
+  if (accs.length) {
+    document.getElementById('chart-accounts').parentElement.style.height = Math.max(240, accs.length * 24 + 40) + 'px';
+    __charts.accounts = new Chart(document.getElementById('chart-accounts'), { type:'bar',
+      data:{ labels: accs.map(a=>ocAccParts(a).name), datasets:[{ label:'Saldo', data: accs.map(a=>bal[a.accountsTableID]),
+        backgroundColor: accs.map(a=>bal[a.accountsTableID]>=0 ? '#3fb88a' : '#c1553d') }] },
+      options:{ maintainAspectRatio:false, indexAxis:'y', plugins:{ legend:{ display:false } },
+        scales:{ x:{ ticks:{ color:soft, font:{ size:10 } }, grid:{ color:grid } }, y:{ ticks:{ color:ink, font:{ size:10 }, autoSkip:false }, grid:{ display:false } } } } });
+  } else document.getElementById('chart-accounts').parentElement.innerHTML = '<p class="faint">Sin saldos.</p>';
+  const b = document.getElementById('chart-budget');
+  if (b) {
+    const rows = dbAll(`SELECT categoryTableID id, childCategoryName name, budgetAmount amt FROM CHILDCATEGORYTABLE WHERE budgetEnabledCategoryChild=1`);
+    __charts.budget = new Chart(b, { type:'bar',
+      data:{ labels: rows.map(r=>ocSplitCode(r.name).name), datasets:[
+        { label:'Presupuesto', data: rows.map(r=>r.amt/SCALE), backgroundColor:'#c9d3e0' },
+        { label:'Gastado', data: rows.map(r=>getCategoryMonthSpend(r.id, ym)/SCALE), backgroundColor:'#c8973a' } ] },
+      options:{ maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:ink } } }, scales:{ x:{ ticks:{ color:soft }, grid:{ display:false } }, y:{ ticks:{ color:soft }, grid:{ color:grid } } } } });
+  }
+}
+
+/* ---------- vista anual ---------- */
+function repYearHtml(year) {
+  const nowYM = ocLocalYM();
+  const isCur = year === Number(nowYM.slice(0,4));
+  const lastYM = isCur ? nowYM : `${year}-12`;
+  const first = dbOne(`SELECT MIN(substr(date,1,7)) m FROM TRANSACTIONSTABLE WHERE deletedTransaction=6 AND transactionTypeID IN (3,4) AND substr(date,1,4)=?`, [String(year)]);
+  const firstM = first && first.m ? Number(first.m.slice(5,7)) : 1;
+  const monthsCount = Math.max(1, Number(lastYM.slice(5,7)) - firstM + 1);
+  const cur = repTotals(`${year}-01`, `${year}-12`);
+  // comparación justa: el año anterior hasta el mismo mes, si el año actual aún no termina
+  const prevSame = repTotals(`${year-1}-01`, `${year-1}-${lastYM.slice(5,7)}`);
+  const prevFull = repTotals(`${year-1}-01`, `${year-1}-12`);
+  const months = repMonthly(year), prevMonths = repMonthly(year-1);
+  const gastos = repByCategory(3, `${year}-01`, `${year}-12`);
+  const ingresos = repByCategory(4, `${year}-01`, `${year}-12`);
+  const prevG = {}; repByCategory(3, `${year-1}-01`, `${year-1}-12`).forEach(p=>prevG[p.pid] = p.total);
+  const hasPrev = prevFull.ing > 0 || prevFull.gas > 0;
+  const lm = Number(lastYM.slice(5,7));
+  const cmpLabel = isCur ? (lm===1 ? `vs ene ${year-1}` : `vs ene–${OC_MES3[lm-1]} ${year-1}`) : `vs ${year-1}`;
+  const empty = !cur.ing && !cur.gas;
+  // Promedio mensual: en el año en curso se excluye el mes que aún no termina
+  const avg = (()=>{
+    if (isCur && monthsCount > 1) {
+      const done = repTotals(`${year}-${ocPad2(firstM)}`, ocYMAdd(lastYM, -1));
+      return { value: done.gas / (monthsCount-1), label: `${monthsCount-1} ${monthsCount-1===1?'mes completo':'meses completos'}` };
+    }
+    return { value: cur.gas / monthsCount, label: monthsCount===1 ? '1 mes con datos' : `${monthsCount} meses` };
+  })();
+  return `
+    <div class="grid cols-4 tcm-kpis">
+      <div class="card stat"><div class="label">Ingresos ${year}</div><div class="value pos">${repMoney(cur.ing)}</div><div class="foot">${empty?'sin movimientos aún':repDelta(cur.ing, prevSame.ing, true, cmpLabel)}</div></div>
+      <div class="card stat"><div class="label">Gastos ${year}</div><div class="value neg">${repMoney(cur.gas)}</div><div class="foot">${empty?'sin movimientos aún':repDelta(cur.gas, prevSame.gas, false, cmpLabel)}</div></div>
+      <div class="card stat"><div class="label">Neto</div><div class="value ${cur.neto<0?'neg':'pos'}">${repSigned(cur.neto)}</div><div class="foot">ahorro ${cur.ahorro==null?'—':cur.ahorro.toFixed(1)+'%'}</div></div>
+      <div class="card stat"><div class="label">Gasto promedio</div><div class="value">${empty?'—':repMoney(avg.value)}</div><div class="foot">${empty?'aún sin datos':'por mes · '+avg.label}</div></div>
+    </div>
+    <div class="card"><div class="section-heading" style="margin-top:0;"><h3>Ingresos y gastos por mes</h3></div>
+      <div style="height:260px;position:relative;"><canvas id="chart-year" aria-label="Ingresos y gastos por mes"></canvas></div>
+      ${hasPrev?`<p class="hint">La línea punteada son los gastos de ${year-1}.</p>`:''}</div>
+    <div class="card"><div class="section-heading" style="margin-top:0;"><h3>Mes a mes</h3></div>
+      <p class="hint" style="margin-top:0;">Toca un mes para abrir su reporte.</p>
+      <div class="table-scroll"><table class="tcm-table">
+        <thead><tr><th>Mes</th><th class="n">Ingresos</th><th class="n">Gastos</th><th class="n">Neto</th>${hasPrev?`<th class="n">Gastos ${year-1}</th><th class="n">Variación</th>`:''}</tr></thead>
+        <tbody>${months.map((m,i)=>{
+          const future = m.ym > nowYM;
+          return `<tr class="rep-child ${future?'rep-future':''}" role="button" tabindex="0" onclick="repOpenMonth('${m.ym}')" onkeydown="if(event.key==='Enter')this.click()">
+            <td>${OC_MESES[i].replace(/^./, c=>c.toUpperCase())}</td><td class="n">${future?'—':repT(m.ing)}</td><td class="n">${future?'—':repT(m.gas)}</td><td class="n">${future?'—':repT(m.neto)}</td>
+            ${hasPrev?`<td class="n">${repT(prevMonths[i].gas)}</td><td class="n">${future?'—':repDelta(m.gas, prevMonths[i].gas, false)}</td>`:''}</tr>`; }).join('')}
+          <tr class="tot"><td>Total</td><td class="n">${repT(cur.ing)}</td><td class="n">${repT(cur.gas)}</td><td class="n">${repT(cur.neto)}</td>${hasPrev?`<td class="n">${repT(prevFull.gas)}</td><td class="n">${isCur?'':repDelta(cur.gas, prevFull.gas, false)}</td>`:''}</tr>
+        </tbody></table></div></div>
+    <div class="card"><div class="section-heading" style="margin-top:0;"><h3>Gastos por categoría en ${year}</h3></div>
+      <p class="hint" style="margin-top:0;">Toca una categoría para ver sus movimientos del año.</p>
+      ${repCategoryTable(gastos, cur.gas, `${year}-01`, `${year}-12`, { avg: monthsCount, prev: hasPrev ? prevG : null })}</div>
+    <div class="card"><div class="section-heading" style="margin-top:0;"><h3>Ingresos por categoría en ${year}</h3></div>
+      ${repCategoryTable(ingresos, cur.ing, `${year}-01`, `${year}-12`, { avg: monthsCount })}</div>`;
+}
+function repYearCharts(year) {
+  const { ink, soft, grid } = getChartThemeColors();
+  const nowYM = ocLocalYM();
+  const months = repMonthly(year), prev = repMonthly(year-1);
+  const hasPrev = prev.some(m=>m.gas || m.ing);
+  const cut = v => (m)=> m.ym > nowYM ? null : v(m);
+  const datasets = [
+    { type:'bar', label:'Ingresos', data: months.map(cut(m=>m.ing)), backgroundColor:'#3fb88a', order:2 },
+    { type:'bar', label:'Gastos', data: months.map(cut(m=>m.gas)), backgroundColor:'#c1553d', order:2 },
+  ];
+  if (hasPrev) datasets.push({ type:'line', label:`Gastos ${year-1}`, data: prev.map(m=>m.gas), borderColor:'#c8973a', backgroundColor:'#c8973a', borderDash:[6,4], pointRadius:2, tension:.25, order:1 });
+  __charts.year = new Chart(document.getElementById('chart-year'), {
+    data:{ labels: OC_MES3, datasets },
+    options:{ maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:ink, boxWidth:12 } } },
+      scales:{ x:{ ticks:{ color:soft }, grid:{ display:false } }, y:{ ticks:{ color:soft }, grid:{ color:grid } } } } });
 }
 
 main();
