@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>🪙 OWNCOIN v7.2 — Gestor Financiero Personal</title>
+<title>🪙 OWNCOIN v7.3 — Gestor Financiero Personal</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1030,6 +1030,30 @@ html[data-palette="grises"]:not([data-theme="dark"]) .app-topbar .pill-item.acti
 .pal-sw{ box-shadow:0 0 0 1px rgba(0,0,0,.18); }
 /* En pantallas anchas el nombre OWNCOIN no se recorta: el menú cede el espacio */
 @media(min-width:1400px){ .app-brand{ flex:0 0 auto; container-type:normal; } .app-topbar .pill-nav{ min-width:0; } }
+
+/* ---------- v7.3 ---------- */
+.osel-hidden{ display:none !important; }
+.osel-btn .catpick-txt .catpick-name{ font-weight:500; }
+.osel-btn.osel-inline{ width:auto; min-width:170px; }
+.tcm-stmtbar .osel-btn{ width:auto; min-width:190px; font-family:var(--font-display); font-weight:700; font-size:15px; color:var(--heading); background:var(--card); border-radius:10px; }
+.tcm-stmtbar .osel-btn .catpick-name{ font-weight:700; }
+.tcm-addrow .osel-btn{ flex:1; min-width:120px; width:auto; }
+.filters-bar .osel-btn{ min-width:170px; width:auto; flex:1; }
+.osel-btn:disabled{ opacity:.55; cursor:not-allowed; }
+.osel-sheet{ max-width:420px; }
+.osel-item{ min-height:46px; }
+.osel-item:disabled{ opacity:.45; cursor:default; }
+/* Fecha y hora siempre juntas, también en el teléfono */
+.dt-pair{ grid-column:1 / -1; display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:12px; }
+.dt-pair .field{ margin:0; }
+/* Deshacer / rehacer */
+.icon-btn.ur-btn{ padding:9px 11px; }
+.icon-btn.ur-btn:disabled{ opacity:.35; cursor:default; }
+.icon-btn.ur-btn svg{ display:block; }
+.toast{ display:flex; align-items:center; gap:10px; }
+.toast-undo{ margin-left:auto; flex-shrink:0; background:rgba(255,255,255,.16); color:#fff; border:1px solid rgba(255,255,255,.35); border-radius:7px; padding:5px 10px; font-weight:700; font-size:12px; cursor:pointer; font-family:var(--font-body); }
+.toast-undo:hover{ background:rgba(255,255,255,.28); }
+@media(max-width:560px){ #btn-theme-toggle{ display:none; } .icon-btn.ur-btn{ padding:8px 9px; } }
 </style>
 </head>
 <script>
@@ -1053,7 +1077,7 @@ html[data-palette="grises"]:not([data-theme="dark"]) .app-topbar .pill-item.acti
 <!-- ===================== LANDING (choose DB source) ===================== -->
 <div id="landing">
   <div class="landing-card">
-    <div class="landing-mark">🪙 OWNCOIN <span style="color:var(--gold-600);">v7.2</span><span class="digits">Gestor financiero personal</span></div>
+    <div class="landing-mark">🪙 OWNCOIN <span style="color:var(--gold-600);">v7.3</span><span class="digits">Gestor financiero personal</span></div>
     <p class="landing-sub">Tus cuentas, tarjetas y presupuestos en un solo lugar, con respaldos en JSON y sincronización con tu GitHub privado.</p>
     <div class="landing-options">
       <div class="landing-opt" id="opt-new">
@@ -1082,7 +1106,7 @@ html[data-palette="grises"]:not([data-theme="dark"]) .app-topbar .pill-item.acti
   <div class="app-brand">
     <div class="mark">🪙</div>
     <div style="min-width:0;">
-      <div class="name">OWNCOIN <small>v7.2</small></div>
+      <div class="name">OWNCOIN <small>v7.3</small></div>
       <div class="tag" id="brand-filename">sin archivo</div>
       <div class="tag" id="autosave-indicator" style="color:#a9d6bb;">—</div>
     </div>
@@ -1098,6 +1122,8 @@ html[data-palette="grises"]:not([data-theme="dark"]) .app-topbar .pill-item.acti
     <div class="pill-item" data-view="configuracion"><span class="ic">⚙</span> Config.</div>
   </div>
   <div class="topbar-actions">
+    <button class="icon-btn ur-btn" id="btn-undo" title="Nada que deshacer" aria-label="Deshacer" disabled onclick="undoAction()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
+    <button class="icon-btn ur-btn" id="btn-redo" title="Nada que rehacer" aria-label="Rehacer" disabled onclick="redoAction()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></svg></button>
     <button class="icon-btn" id="btn-theme-toggle" title="Cambiar a modo oscuro">🌙</button>
     <button class="icon-btn hidden" id="btn-sync" title="Sincronizar con GitHub" aria-label="Sincronizar con GitHub" onclick="ghsSync('manual')"><span class="sync-ic">⟳</span></button>
     <button class="icon-btn" id="btn-export-quick" title="Descargar respaldo .json" aria-label="Descargar respaldo .json">⬇ <span class="lbl">Respaldo</span></button>
@@ -1263,6 +1289,7 @@ async function persistCurrentDatabase() {
     const bytes = App.db.export();
     await idbPut(IDB_KEY, { fileName: App.fileName, bytes, savedAt: Date.now() });
     setAutosaveIndicator('saved');
+    if (typeof undoOnPersist === 'function') undoOnPersist(bytes);
     if (!App.__noDirty && typeof ghsMarkDirty === 'function') ghsMarkDirty();
   } catch (e) {
     console.error('Autoguardado falló:', e);
@@ -1646,6 +1673,8 @@ function showToast(msg, kind='info') {
   const el = document.createElement('div');
   el.className = `toast ${kind}`;
   el.textContent = msg;
+  el.dataset.at = Date.now();
+  if (kind === 'success') App.__lastAction = { msg, at: Date.now() };
   stack.appendChild(el);
   setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .25s'; setTimeout(()=>el.remove(),250); }, 3400);
 }
@@ -2221,7 +2250,7 @@ function openWidgetConfig(key) {
     title = 'Resumen del presupuesto';
     fieldsHtml = `
       <div class="field"><label>Cuenta</label><select id="wcfg-account"><option value="">Todas las cuentas</option>${accounts.map(a=>`<option value="${a.accountsTableID}" ${cfg.account==a.accountsTableID?'selected':''}>${accountDisplayLabel(a)}</option>`).join('')}</select></div>
-      <div class="field"><label>Mes</label><input type="month" id="wcfg-month" value="${cfg.month || ocLocalYM()}"></div>`;
+      <div class="field"><label>Mes</label><select id="wcfg-month">${ocMonthSelectOptions(cfg.month || ocLocalYM())}</select></div>`;
   } else if (key==='favaccounts') {
     title = 'Cuentas favoritas';
     fieldsHtml = `<div class="field"><label>Cantidad de cuentas a mostrar</label><select id="wcfg-count">${[4,6,8,12,20].map(n=>`<option value="${n}" ${cfg.count==n?'selected':''}>${n}</option>`).join('')}</select></div>`;
@@ -3076,8 +3105,7 @@ function renderTxnFormBody() {
         <div class="field"><label>Desde cuenta</label>${accPickerField('f-txn-from', ctx.transfer ? ctx.transfer.from : (selAcc!=null && selAcc!=='' ? selAcc : (accounts[0]||{}).accountsTableID), { ids: accounts.map(a=>a.accountsTableID), title:'Desde qué cuenta' })}</div>
         <div class="field"><label>Hacia cuenta</label>${accPickerField('f-txn-to', ctx.transfer ? ctx.transfer.to : '', { ids: accounts.map(a=>a.accountsTableID), placeholder:'Elige la cuenta destino', title:'Hacia qué cuenta' })}</div>
         <div class="field amount"><label>Monto</label><input id="f-txn-amount" type="number" step="0.01" value="${src?Math.abs(src.amount/SCALE).toFixed(2):''}"></div>
-        <div class="field"><label>Fecha</label><input id="f-txn-date" type="date" value="${dt.date}"></div>
-        <div class="field"><label>Hora</label><input id="f-txn-time" type="time" value="${dt.time}"></div>
+        <div class="dt-pair"><div class="field"><label for="f-txn-date">Fecha</label><input id="f-txn-date" type="date" value="${dt.date}"></div><div class="field"><label for="f-txn-time">Hora</label><input id="f-txn-time" type="time" value="${dt.time}"></div></div>
         <div class="field span-2"><label for="f-txn-notes">Notas</label><textarea id="f-txn-notes" rows="3" oninput="autoGrow(this)" placeholder="Describe el movimiento (opcional)">${src?escapeHtml(src.notes||''):''}</textarea></div>
       </div>`;
     return;
@@ -3088,8 +3116,7 @@ function renderTxnFormBody() {
     <div class="form-grid">
       <div class="field span-2 autocomplete-wrap"><label>Nombre *</label><input id="f-txn-name" placeholder="Ej. Almuerzo, Supermercado, Sueldo…" value="${src?(src.itemName||''):''}" autocomplete="off" oninput="handleTxnNameInput(this)" onfocus="handleTxnNameFocus(this)" onblur="handleTxnNameBlur()" onkeydown="handleTxnNameKeydown(event)"><div class="autocomplete-list" id="txn-name-suggestions"></div></div>
       <div class="field"><label>Cuenta</label>${accPickerField('f-txn-account', selAcc!=null && selAcc!=='' ? selAcc : (accounts[0]||{}).accountsTableID, { ids: accounts.map(a=>a.accountsTableID) })}</div>
-      <div class="field"><label>Fecha</label><input id="f-txn-date" type="date" value="${dt.date}"></div>
-      <div class="field"><label>Hora</label><input id="f-txn-time" type="time" value="${dt.time}"></div>
+      <div class="dt-pair"><div class="field"><label for="f-txn-date">Fecha</label><input id="f-txn-date" type="date" value="${dt.date}"></div><div class="field"><label for="f-txn-time">Hora</label><input id="f-txn-time" type="time" value="${dt.time}"></div></div>
       <div class="field"><label>Moneda</label><input id="f-txn-currency" value="${src?(src.transactionCurrency||'USD'):'USD'}" maxlength="4"></div>
       ${canSplit ? '' : `
       <div class="field amount"><label>Monto</label><input id="f-txn-amount" type="number" step="0.01" value="${src?Math.abs(src.amount/SCALE).toFixed(2):''}"></div>
@@ -3685,6 +3712,7 @@ function confirmClearAutosave() {
 function bootApp() {
   if (typeof ghsPaintStatus === 'function') setTimeout(ghsPaintStatus, 0);
   ocCategoryMaintenance();
+  if (App.undo && App.undo.forDb !== App.db) undoReset(); else undoPaint();
   document.getElementById('landing').classList.add('hidden');
   document.getElementById('app-topbar').classList.remove('hidden');
   document.getElementById('app-shell').classList.remove('hidden');
@@ -4892,16 +4920,15 @@ function tcmOpenCharge(id, accountId) {
     <div class="modal-head"><h3>${id?'Editar cargo':'Registrar cargo'}</h3><button class="modal-close" onclick="closeModal()" aria-label="Cerrar">✕</button></div>
     <div class="modal-body"><div class="form-grid">
       <div class="field span-2"><label for="tcf-card">Tarjeta</label>${accPickerField('tcf-card', card.accountId, { ids: cards.map(c=>c.accountId), title:'Elegir tarjeta', onchange:"tcmChargeRecalc('card')" })}</div>
+      <div class="dt-pair"><div class="field"><label for="tcf-date">Fecha</label><input id="tcf-date" type="date" value="${day}" onchange="tcmChargeRecalc('date')"></div><div class="field"><label for="tcf-time">Hora</label><input id="tcf-time" type="time" value="${time}"></div></div>
       <div class="field"><label for="tcf-amount">Monto</label><input id="tcf-amount" type="number" inputmode="decimal" step="0.01" min="0" value="${amount}" oninput="tcmChargeRecalc('amount')" placeholder="0.00"></div>
-      <div class="field"><label for="tcf-date">Fecha</label><input id="tcf-date" type="date" value="${day}" onchange="tcmChargeRecalc('date')"></div>
+      <div class="field"><label for="tcf-stmt">Estado de cuenta</label><select id="tcf-stmt" onchange="window.__tcmF.stmtTouched=true">${tcmStmtOptions(stmt)}</select></div>
       <div class="field span-2"><label for="tcf-name">Descripción</label><input id="tcf-name" list="tcf-names" value="${escapeHtml(t?t.itemName||'':'')}" oninput="tcmChargeRecalc('name')" placeholder="Comercio o concepto" autocomplete="off">
         <datalist id="tcf-names">${getItemNamesRanked().slice(0,300).map(n=>`<option value="${escapeHtml(n)}">`).join('')}</datalist></div>
       <div class="field span-2"><label for="tcf-notes">Detalle (opcional)</label><textarea id="tcf-notes" rows="3" oninput="autoGrow(this)" placeholder="Qué compraste, para quién…">${escapeHtml(t?t.notes||'':'')}</textarea></div>
-      <div class="field"><label for="tcf-cat">Categoría</label>${catPickerField('tcf-cat', catId, { kind:'exp', onchange:'window.__tcmF.catTouched=true' })}</div>
-      <div class="field"><label for="tcf-stmt">Estado de cuenta</label><select id="tcf-stmt" onchange="window.__tcmF.stmtTouched=true">${tcmStmtOptions(stmt)}</select></div>
+      <div class="field span-2"><label for="tcf-cat">Categoría</label>${catPickerField('tcf-cat', catId, { kind:'exp', onchange:'window.__tcmF.catTouched=true' })}</div>
       <div class="field"><label for="tcf-cb">Cashback</label><input id="tcf-cb" type="number" step="0.0001" min="0" value="${t && t.cashback!=null ? t.cashback : ''}" oninput="window.__tcmF.cbTouched=true" placeholder="0.00"><span class="hint" id="tcf-cbhint"></span></div>
       <div class="field"><label for="tcf-zero">Tasa cero</label><select id="tcf-zero"></select></div>
-      <div class="field"><label for="tcf-time">Hora</label><input id="tcf-time" type="time" value="${time}"></div>
       ${people.length?`<div class="field span-2"><label>Asignar a personas (distribución)</label><div class="tcm-people" id="tcf-people">${people.map(p=>`<label><input type="checkbox" value="${escapeHtml(p.id)}" ${personas.includes(p.id)?'checked':''}> ${escapeHtml(p.name)}</label>`).join('')}</div></div>`:''}
     </div></div>
     <div class="modal-foot">
@@ -5004,11 +5031,10 @@ function tcmOpenPayment(id, accountId) {
       <div class="form-grid">
       <div class="field"><label for="tcp-card">Tarjeta</label>${accPickerField('tcp-card', card.accountId, { ids: cards.map(c=>c.accountId), title:'Elegir tarjeta', onchange:'tcmPaymentRecalc()' })}</div>
       <div class="field"><label for="tcp-from">Pagado desde</label>${accPickerField('tcp-from', from, { ids: sources.map(a=>a.accountsTableID), title:'¿Desde qué cuenta pagaste?', placeholder:'Elige la cuenta' })}</div>
+      <div class="dt-pair"><div class="field"><label for="tcp-date">Fecha</label><input id="tcp-date" type="date" value="${day}" onchange="tcmPaymentRecalc()"></div><div class="field"><label for="tcp-time">Hora</label><input id="tcp-time" type="time" value="${t?t.date.slice(11,16):tcmNowTime()}"></div></div>
       <div class="field"><label for="tcp-amount">Monto</label><input id="tcp-amount" type="number" inputmode="decimal" step="0.01" min="0" value="${t?Math.abs(t.amount/SCALE):''}" placeholder="0.00">
         <div class="tcm-quick" id="tcp-quick"></div></div>
-      <div class="field"><label for="tcp-date">Fecha</label><input id="tcp-date" type="date" value="${day}" onchange="tcmPaymentRecalc()"></div>
       <div class="field"><label for="tcp-stmt">Paga el estado de cuenta</label><select id="tcp-stmt" onchange="window.__tcmF.stmtTouched=true;tcmPaymentRecalc()">${tcmStmtOptions(stmt)}</select></div>
-      <div class="field"><label for="tcp-time">Hora</label><input id="tcp-time" type="time" value="${t?t.date.slice(11,16):tcmNowTime()}"></div>
       <div class="field span-2"><label for="tcp-notes">Referencia (opcional)</label><textarea id="tcp-notes" rows="2" oninput="autoGrow(this)" placeholder="Ej. Transfer 365">${escapeHtml(t?t.notes||'':'')}</textarea></div>
     </div></div>
     <div class="modal-foot">
@@ -5586,10 +5612,9 @@ function tcmOpenCredit(id, accountId, pre) {
       <p class="hint" style="margin-top:0;">Para descuentos, promociones, cashback aplicado o devoluciones que el banco abona a la tarjeta. Baja la deuda del estado de cuenta que elijas; por defecto, el del ciclo en que se aplicó.</p>
       <div class="form-grid">
       <div class="field span-2"><label>Tarjeta</label>${accPickerField('tcc-card', card.accountId, { ids: cards.map(c=>c.accountId), title:'Elegir tarjeta', onchange:'tcmCreditRecalc()' })}</div>
+      <div class="dt-pair"><div class="field"><label for="tcc-date">Fecha</label><input id="tcc-date" type="date" value="${day}" onchange="tcmCreditRecalc()"></div><div class="field"><label for="tcc-time">Hora</label><input id="tcc-time" type="time" value="${t?t.date.slice(11,16):tcmNowTime()}"></div></div>
       <div class="field"><label for="tcc-amount">Monto</label><input id="tcc-amount" type="number" inputmode="decimal" step="0.01" min="0" value="${t?Math.abs(t.amount/SCALE):(pre.amount||'')}" placeholder="0.00"></div>
-      <div class="field"><label for="tcc-date">Fecha</label><input id="tcc-date" type="date" value="${day}" onchange="tcmCreditRecalc()"></div>
       <div class="field"><label for="tcc-stmt">Aplicar al estado de cuenta</label><select id="tcc-stmt" onchange="window.__tcmF.stmtTouched=true">${tcmStmtOptions(stmt)}</select></div>
-      <div class="field"><label for="tcc-time">Hora</label><input id="tcc-time" type="time" value="${t?t.date.slice(11,16):tcmNowTime()}"></div>
       <div class="field span-2"><label for="tcc-name">Concepto</label><input id="tcc-name" value="${escapeHtml(t?t.itemName||'':'Descuento promocional')}" placeholder="Descuento promocional, cashback…"></div>
       <div class="field span-2"><label>Categoría de ingreso</label>${catPickerField('tcc-cat', catId, { kind:'inc' })}</div>
       <div class="field span-2"><label for="tcc-notes">Detalle (opcional)</label><textarea id="tcc-notes" rows="2" oninput="autoGrow(this)" placeholder="Ej. 20% en compras de súper del 20/09">${escapeHtml(t?t.notes||'':'')}</textarea></div>
@@ -5647,7 +5672,7 @@ function tcmSaveCredit() {
    El mismo JSON sirve para descargarlo como respaldo y para guardarlo en
    un repositorio PRIVADO de GitHub mediante su API de contenidos.
    ===================================================================== */
-const OC_APP_VERSION = '7.2';
+const OC_APP_VERSION = '7.3';
 const BKP_FORMAT = 'owncoin-backup';
 
 /* ---------- JSON <-> base de datos ---------- */
@@ -6953,6 +6978,235 @@ function ocPaletteCard() {
     <label class="tci-check" style="margin-top:14px;"><input type="checkbox" ${amoled?'checked':''} onchange="ocSetAmoled(this.checked)"> Negro puro en modo oscuro</label>
     <div class="hint">Fondo totalmente negro: ideal para pantallas AMOLED, ahorra batería y descansa la vista de noche.${amoled && !isDark ? ' Se nota al activar el modo oscuro.' : ''}</div>
   </div>`;
+}
+
+/* =====================================================================
+   DESHACER / REHACER (v7.3)
+   Cada vez que la app guarda un cambio (crear, editar, borrar, importar,
+   categorizar…) se conserva la versión anterior de la base comprimida en
+   memoria. Deshacer la restaura; Rehacer vuelve a aplicar el cambio.
+   Vale para la sesión abierta (hasta 25 pasos). Atajos en la PC:
+   Ctrl+Z deshacer, Ctrl+Y o Ctrl+Shift+Z rehacer.
+   ===================================================================== */
+const UNDO_MAX = 25;
+App.undo = { stack:[], redo:[], base:null, forDb:null, busy:false };
+
+async function ucPack(bytes) {
+  if (typeof CompressionStream === 'undefined') return { raw: bytes };
+  const buf = await new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer();
+  return { gz: new Uint8Array(buf) };
+}
+async function ucUnpack(p) {
+  if (p.raw) return p.raw;
+  const buf = await new Response(new Blob([p.gz]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+  return new Uint8Array(buf);
+}
+function ucSame(a, b) {
+  if (!a || !b || a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+  return true;
+}
+/* Punto de partida: la base tal como está al abrirse (o al cambiarla por otra) */
+function undoReset() {
+  const U = App.undo;
+  U.stack = []; U.redo = [];
+  U.base = App.db ? App.db.export() : null; U.forDb = App.db;
+  undoPaint();
+}
+/* Lo llama persistCurrentDatabase con la base recién guardada */
+function undoOnPersist(bytes) {
+  const U = App.undo;
+  if (App.__noUndo || U.forDb !== App.db || !U.base) {
+    if (U.forDb !== App.db) { U.stack = []; U.redo = []; }
+    U.base = bytes; U.forDb = App.db; undoPaint(); return;
+  }
+  if (ucSame(U.base, bytes)) return;
+  const prev = U.base; U.base = bytes;
+  const la = App.__lastAction;
+  const label = la && Date.now() - la.at < 5000 ? la.msg.replace(/[.!]\s*$/, '') : 'Último cambio';
+  App.__lastAction = null;
+  U.stack.push({ label, at: Date.now(), p: ucPack(prev) });
+  if (U.stack.length > UNDO_MAX) U.stack.shift();
+  U.redo = [];
+  undoPaint();
+  undoOfferInToast();
+}
+/* Botón "Deshacer" dentro del aviso verde que confirma la acción */
+function undoOfferInToast() {
+  const toasts = Array.from(document.querySelectorAll('#toast-stack .toast.success'));
+  const el = toasts[toasts.length - 1];
+  if (!el || el.querySelector('.toast-undo') || Date.now() - (Number(el.dataset.at) || 0) > 5000) return;
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'toast-undo'; b.textContent = 'Deshacer';
+  b.onclick = (e)=>{ e.stopPropagation(); el.remove(); undoAction(); };
+  el.appendChild(b);
+}
+async function undoFlush() {
+  clearTimeout(__autosaveTimer);
+  for (let i = 0; i < 40 && __autosaveInFlight; i++) await new Promise(r=>setTimeout(r, 50));
+  await persistCurrentDatabase();
+}
+async function undoLoad(bytes) {
+  const U = App.undo;
+  const db = new App.SQL.Database(bytes);
+  const old = App.db;
+  App.db = db; U.forDb = db; U.base = bytes;
+  App.__noUndo = true;
+  try { await persistCurrentDatabase(); } finally { App.__noUndo = false; }
+  try { old.close(); } catch(e) {}
+  App.tcmLearned = null;
+  refreshAfterChange();
+  undoPaint();
+}
+function undoBlocked() {
+  if (document.getElementById('modal-root').classList.contains('open')) { showToast('Cierra la ventana abierta antes de deshacer o rehacer.', 'error'); return true; }
+  if (App.securityUnlocked === false) return true;
+  return false;
+}
+async function undoAction() {
+  const U = App.undo;
+  if (U.busy || undoBlocked()) return;
+  U.busy = true;
+  try {
+    await undoFlush();
+    if (!U.stack.length) { showToast('No hay nada que deshacer.', 'info'); return; }
+    const e = U.stack.pop();
+    const bytes = await ucUnpack(await e.p);
+    U.redo.push({ label:e.label, at:Date.now(), p: ucPack(U.base) });
+    await undoLoad(bytes);
+    showToast(`↶ Deshecho: ${e.label}`, 'info');
+  } catch (err) { console.error(err); showToast('No se pudo deshacer: ' + err.message, 'error'); }
+  finally { U.busy = false; undoPaint(); }
+}
+async function redoAction() {
+  const U = App.undo;
+  if (U.busy || undoBlocked()) return;
+  U.busy = true;
+  try {
+    await undoFlush();
+    if (!U.redo.length) { showToast('No hay nada que rehacer.', 'info'); return; }
+    const e = U.redo.pop();
+    const bytes = await ucUnpack(await e.p);
+    U.stack.push({ label:e.label, at:Date.now(), p: ucPack(U.base) });
+    await undoLoad(bytes);
+    showToast(`↷ Rehecho: ${e.label}`, 'info');
+  } catch (err) { console.error(err); showToast('No se pudo rehacer: ' + err.message, 'error'); }
+  finally { U.busy = false; undoPaint(); }
+}
+function undoPaint() {
+  const U = App.undo;
+  const u = document.getElementById('btn-undo'), r = document.getElementById('btn-redo');
+  if (u) { const last = U.stack[U.stack.length-1]; u.disabled = !U.stack.length; u.title = last ? `Deshacer: ${last.label} (Ctrl+Z)` : 'Nada que deshacer'; u.setAttribute('aria-label', u.title); }
+  if (r) { const last = U.redo[U.redo.length-1]; r.disabled = !U.redo.length; r.title = last ? `Rehacer: ${last.label} (Ctrl+Y)` : 'Nada que rehacer'; r.setAttribute('aria-label', r.title); }
+}
+document.addEventListener('keydown', (e)=>{
+  if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (k !== 'z' && k !== 'y') return;
+  const t = e.target;
+  // dentro de un campo de texto, Ctrl+Z deshace lo escrito (comportamiento normal del navegador)
+  if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+  if (!App.db || document.getElementById('app-shell').classList.contains('hidden')) return;
+  e.preventDefault();
+  if (k === 'y' || e.shiftKey) redoAction(); else undoAction();
+});
+
+/* =====================================================================
+   LISTAS DESPLEGABLES CON EL MISMO FORMATO (v7.3)
+   Toda <select> de la app se muestra con la misma hoja de selección que
+   categorías y cuentas. La <select> original sigue existiendo (oculta),
+   así que su valor y sus eventos funcionan igual que antes.
+   ===================================================================== */
+const __selValue = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value');
+const __selIndex = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'selectedIndex');
+function oselEnhance(sel) {
+  if (sel.__osel || sel.multiple || sel.hasAttribute('data-native') || sel.closest('.catpick-sheet')) return;
+  sel.__osel = true;
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'catpick-btn osel-btn';
+  btn.setAttribute('aria-haspopup', 'listbox');
+  if (sel.id) {
+    btn.id = sel.id + '-osel';
+    const lab = document.querySelector(`label[for="${CSS.escape(sel.id)}"]`);
+    if (lab) lab.htmlFor = btn.id;
+  }
+  if (!sel.closest('.field') && !sel.closest('.tci-row')) btn.classList.add('osel-inline');
+  sel.classList.add('osel-hidden');
+  sel.insertAdjacentElement('afterend', btn);
+  btn.onclick = ()=>oselOpen(sel);
+  sel.__oselBtn = btn;
+  Object.defineProperty(sel, 'value', { configurable:true, get(){ return __selValue.get.call(this); }, set(v){ __selValue.set.call(this, v); oselPaint(this); } });
+  Object.defineProperty(sel, 'selectedIndex', { configurable:true, get(){ return __selIndex.get.call(this); }, set(v){ __selIndex.set.call(this, v); oselPaint(this); } });
+  sel.addEventListener('change', ()=>oselPaint(sel));
+  new MutationObserver(()=>oselPaint(sel)).observe(sel, { childList:true, subtree:true, attributes:true, attributeFilter:['disabled'] });
+  oselPaint(sel);
+}
+function oselPaint(sel) {
+  const btn = sel.__oselBtn; if (!btn) return;
+  const o = sel.options[sel.selectedIndex];
+  btn.innerHTML = `<span class="catpick-txt"><span class="catpick-name">${escapeHtml(o ? o.text : 'Elegir…')}</span></span><span class="catpick-chev" aria-hidden="true">▾</span>`;
+  btn.disabled = sel.disabled;
+  const lab = sel.id ? document.querySelector(`label[for="${CSS.escape(btn.id)}"]`) : null;
+  btn.setAttribute('aria-label', `${lab ? lab.textContent.trim() + ': ' : (sel.getAttribute('aria-label') ? sel.getAttribute('aria-label') + ': ' : '')}${o ? o.text : ''}`);
+}
+function oselOpen(sel) {
+  const btn = sel.__oselBtn;
+  const lab = btn && btn.id ? document.querySelector(`label[for="${CSS.escape(btn.id)}"]`) : null;
+  const title = (lab && lab.textContent.trim()) || sel.getAttribute('aria-label') || 'Elegir una opción';
+  let root = document.getElementById('catpick-root');
+  if (!root) { root = document.createElement('div'); root.id = 'catpick-root'; document.body.appendChild(root); }
+  root.className = 'catpick-backdrop open';
+  root.onpointerdown = (e)=>{ root.__downOnBackdrop = (e.target === root); };
+  root.onclick = (e)=>{ if (e.target === root && root.__downOnBackdrop) closeCatPicker(); };
+  window.__oselCur = sel;
+  const items = [];
+  let n = 0, gi = 0;
+  Array.from(sel.children).forEach(ch=>{
+    const opts = ch.tagName === 'OPTGROUP' ? Array.from(ch.children) : [ch];
+    if (ch.tagName === 'OPTGROUP') { gi++; items.push(`<div class="catpick-head" data-parent="g${gi}">${escapeHtml(ch.label)}</div>`); }
+    opts.forEach(o=>{
+      if (o.tagName !== 'OPTION') return;
+      n++;
+      const selected = o.selected && sel.selectedIndex >= 0;
+      items.push(`<button type="button" class="catpick-item osel-item ${selected?'selected':''}" role="option" aria-selected="${selected}" ${o.disabled?'disabled':''}
+        data-parent="g${ch.tagName==='OPTGROUP'?gi:0}" data-s="${escapeHtml(tciNorm(o.text))}" data-i="${o.index}" onclick="oselPick(${o.index})">
+        <span class="catpick-name">${escapeHtml(o.text)}</span>${selected?'<span class="catpick-check" aria-hidden="true">✓</span>':''}</button>`);
+    });
+  });
+  root.innerHTML = `<div class="catpick-sheet osel-sheet" role="dialog" aria-modal="true" aria-label="${escapeHtml(title)}">
+    <div class="catpick-top"><h3>${escapeHtml(title)}</h3><button type="button" class="modal-close" onclick="closeCatPicker()" aria-label="Cerrar">✕</button></div>
+    ${n > 8 ? `<div class="catpick-search"><input id="catpick-q" type="search" placeholder="Buscar…" oninput="filterCatPicker(this.value)" autocomplete="off"></div>` : ''}
+    <div class="catpick-list" role="listbox">${items.join('')}<p class="hint catpick-none" style="padding:16px;display:none;">Ninguna opción coincide.</p></div></div>`;
+  const s = root.querySelector('.catpick-item.selected'); if (s) s.scrollIntoView({ block:'center' });
+  if (n > 8 && window.matchMedia('(hover: hover)').matches) setTimeout(()=>{ const q = document.getElementById('catpick-q'); if (q) q.focus(); }, 30);
+  document.addEventListener('keydown', catPickEsc);
+}
+function oselPick(index) {
+  const sel = window.__oselCur; closeCatPicker();
+  if (!sel) return;
+  if (sel.selectedIndex !== index) {
+    sel.selectedIndex = index;
+    sel.dispatchEvent(new Event('input', { bubbles:true }));
+    sel.dispatchEvent(new Event('change', { bubbles:true }));
+  }
+  if (sel.__oselBtn) sel.__oselBtn.focus();
+}
+function oselScan(node) {
+  if (!node || node.nodeType !== 1) return;
+  if (node.tagName === 'SELECT') oselEnhance(node);
+  else node.querySelectorAll && node.querySelectorAll('select').forEach(oselEnhance);
+}
+new MutationObserver(muts=>{ muts.forEach(m=>m.addedNodes.forEach(oselScan)); }).observe(document.documentElement, { childList:true, subtree:true });
+document.addEventListener('DOMContentLoaded', ()=>oselScan(document.body));
+if (document.body) oselScan(document.body);
+
+/* Meses como lista (en lugar del calendario nativo de mes) */
+function ocMonthSelectOptions(selected) {
+  const now = ocLocalYM(); const out = [];
+  for (let i = 12; i >= -24; i--) out.push(ocYMAdd(now, i));
+  if (selected && !out.includes(selected)) out.push(selected);
+  return out.sort().reverse().map(ym=>`<option value="${ym}" ${ym===selected?'selected':''}>${ocYMLabel(ym)}</option>`).join('');
 }
 
 main();
