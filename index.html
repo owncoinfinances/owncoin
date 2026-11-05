@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>🪙 OWNCOIN v7.3 — Gestor Financiero Personal</title>
+<title>🪙 OWNCOIN v7.4 — Gestor Financiero Personal</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1054,6 +1054,35 @@ html[data-palette="grises"]:not([data-theme="dark"]) .app-topbar .pill-item.acti
 .toast-undo{ margin-left:auto; flex-shrink:0; background:rgba(255,255,255,.16); color:#fff; border:1px solid rgba(255,255,255,.35); border-radius:7px; padding:5px 10px; font-weight:700; font-size:12px; cursor:pointer; font-family:var(--font-body); }
 .toast-undo:hover{ background:rgba(255,255,255,.28); }
 @media(max-width:560px){ #btn-theme-toggle{ display:none; } .icon-btn.ur-btn{ padding:8px 9px; } }
+
+/* ---------- v7.4 ---------- */
+.cb-row{ display:flex; gap:8px; align-items:stretch; }
+.cb-row input{ flex:1; min-width:0; }
+.cb-calc-btn{ flex-shrink:0; width:44px; border:1.5px solid var(--line); border-radius:9px; background:var(--gold-100); color:var(--gold-600); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; }
+.cb-calc-btn:hover{ border-color:var(--gold-300); }
+.cb-calc-btn:focus-visible{ outline:none; border-color:var(--gold-500); box-shadow:0 0 0 3px var(--ring); }
+.cbc-sheet{ max-width:460px; }
+.cbc-body{ padding:6px 16px 12px; overflow-y:auto; }
+.cbc-row{ display:grid; grid-template-columns:minmax(0,1.2fr) auto minmax(0,.9fr) auto auto; gap:8px; align-items:end; margin-bottom:8px; }
+.cbc-row .field{ margin:0; }
+.cbc-x{ padding-bottom:12px; color:var(--ink-soft); font-weight:700; }
+.cbc-eq{ padding-bottom:12px; font-weight:700; color:var(--ok); white-space:nowrap; font-variant-numeric:tabular-nums; min-width:62px; text-align:right; }
+.cbc-row .icon-btn.mini{ margin-bottom:6px; }
+.cbc-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.cbc-chips button{ border:1.5px solid var(--line); background:var(--card); color:var(--ink); border-radius:20px; padding:5px 11px; font-weight:700; font-size:12.5px; cursor:pointer; font-family:var(--font-body); }
+.cbc-chips button:hover{ border-color:var(--gold-500); background:var(--gold-100); }
+.cbc-total{ margin-top:12px; padding:12px 14px; border-radius:10px; background:var(--bg); font-size:14px; color:var(--ink); }
+.cbc-total b{ color:var(--ok); font-size:17px; }
+.cbc-sheet .modal-foot{ padding:12px 16px; }
+@media(max-width:420px){ .cbc-row{ grid-template-columns:minmax(0,1fr) minmax(0,.8fr) 34px; grid-template-areas:'m p d' 'e e e'; row-gap:2px; margin-bottom:12px; } .cbc-x{ display:none; } .cbc-fm{ grid-area:m; } .cbc-fp{ grid-area:p; } .cbc-del{ grid-area:d; } .cbc-eq{ grid-area:e; text-align:left; padding:0; min-width:0; } }
+/* Teclado del PIN más compacto */
+.pin-keypad{ grid-template-columns:repeat(3, 68px); justify-content:center; gap:14px 22px; margin-top:16px; }
+.pin-key{ width:68px; height:68px; aspect-ratio:auto; font-size:22px; font-weight:600; border-width:1px; box-shadow:0 1px 2px rgba(0,0,0,.06); }
+.pin-key:hover{ border-color:var(--gold-300); }
+.pin-key.pressed, .pin-key:active{ transform:scale(.92); background:var(--gold-100); border-color:var(--gold-500); }
+.pin-key:focus-visible{ outline:none; box-shadow:0 0 0 3px var(--ring); }
+.lock-kbd{ display:none; margin-top:12px; }
+@media (hover: hover) and (pointer: fine){ .lock-kbd{ display:block; } .pin-key{ width:60px; height:60px; font-size:20px; } .pin-keypad{ grid-template-columns:repeat(3, 60px); } }
 </style>
 </head>
 <script>
@@ -1077,7 +1106,7 @@ html[data-palette="grises"]:not([data-theme="dark"]) .app-topbar .pill-item.acti
 <!-- ===================== LANDING (choose DB source) ===================== -->
 <div id="landing">
   <div class="landing-card">
-    <div class="landing-mark">🪙 OWNCOIN <span style="color:var(--gold-600);">v7.3</span><span class="digits">Gestor financiero personal</span></div>
+    <div class="landing-mark">🪙 OWNCOIN <span style="color:var(--gold-600);">v7.4</span><span class="digits">Gestor financiero personal</span></div>
     <p class="landing-sub">Tus cuentas, tarjetas y presupuestos en un solo lugar, con respaldos en JSON y sincronización con tu GitHub privado.</p>
     <div class="landing-options">
       <div class="landing-opt" id="opt-new">
@@ -1106,7 +1135,7 @@ html[data-palette="grises"]:not([data-theme="dark"]) .app-topbar .pill-item.acti
   <div class="app-brand">
     <div class="mark">🪙</div>
     <div style="min-width:0;">
-      <div class="name">OWNCOIN <small>v7.3</small></div>
+      <div class="name">OWNCOIN <small>v7.4</small></div>
       <div class="tag" id="brand-filename">sin archivo</div>
       <div class="tag" id="autosave-indicator" style="color:#a9d6bb;">—</div>
     </div>
@@ -1425,7 +1454,7 @@ function renderLockScreen(cfg) {
       <div class="lock-mark">🪙 OWNCOIN</div>
       <p class="lock-sub">${isBiometric ? 'Usa tu huella o Face ID para continuar' : 'Ingresa tu PIN de 5 dígitos'}</p>
       ${isBiometric ? `
-        <button class="btn primary" style="width:100%;justify-content:center;margin-top:10px;" onclick="attemptBiometricUnlock()">👆 Desbloquear</button>
+        <button class="btn primary" data-bio-unlock style="width:100%;justify-content:center;margin-top:10px;" onclick="attemptBiometricUnlock()">👆 Desbloquear</button>
         <p class="hint" id="lock-error" style="margin-top:10px;color:var(--danger);"></p>
         <button class="btn ghost small" style="margin-top:18px;" onclick="showPinFallbackFromLock()">Usar PIN en su lugar</button>
       ` : `
@@ -1433,15 +1462,18 @@ function renderLockScreen(cfg) {
         <p class="hint" id="lock-error" style="color:var(--danger);min-height:16px;"></p>
         <div class="pin-keypad">
           ${[1,2,3,4,5,6,7,8,9].map(n=>`<button class="pin-key" onclick="pinKeyPress('${n}')">${n}</button>`).join('')}
-          <button class="pin-key ghost" onclick="pinKeyBackspace()">⌫</button>
+          <button class="pin-key ghost" onclick="pinKeyBackspace()" aria-label="Borrar">⌫</button>
           <button class="pin-key" onclick="pinKeyPress('0')">0</button>
           <div></div>
         </div>
+        <p class="hint lock-kbd">También puedes escribir el PIN con el teclado.</p>
       `}
       <button class="btn ghost small" style="margin-top:22px;" onclick="confirmForgotPin()">¿Olvidaste tu PIN o no puedes usar biometría?</button>
     </div>
   `;
   window.__pinBuffer = '';
+  // Equipo sin lector de huellas: ir directo al PIN de respaldo
+  if (isBiometric && cfg.pinHash) isBiometricAvailable().then(ok=>{ if (!ok && document.getElementById('lock-screen')) renderLockScreen(Object.assign({}, cfg, { method:'pin' })); });
 }
 function showPinFallbackFromLock() {
   getSecurityConfig().then(cfg=>{
@@ -2155,9 +2187,7 @@ function computeBudgetSummaryData(ym, accountId) {
     WHERE tr.deletedTransaction=6 AND tr.amount<0 AND tr.transactionTypeID=3 AND substr(tr.date,1,7)=? ${acctClause}
     GROUP BY tr.categoryID ORDER BY total DESC`, params);
 }
-function getCreditCardAccounts() {
-  return getAccounts(false).filter(a=>a.creditLimit && a.creditLimit>0);
-}
+
 function computeCalendarDots(ym) {
   const rows = dbAll(`SELECT substr(date,1,10) as day, transactionTypeID FROM TRANSACTIONSTABLE WHERE deletedTransaction=6 AND substr(date,1,7)=?`, [ym]);
   const map = {};
@@ -2447,25 +2477,6 @@ function renderBudgetSummaryWidget() {
 }
 
 /* --- Resumen de tarjeta de crédito --- */
-function renderCreditCardWidget() {
-  const cards = getCreditCardAccounts();
-  const balances = getAllBalancesMap();
-  const row2 = document.getElementById('dash-widgets-row2');
-  row2.insertAdjacentHTML('beforeend', widgetCard('dash-cc', 'Resumen de la tarjeta de crédito', `
-    ${cards.length ? cards.map(c=>{
-      const bal = balances[c.accountsTableID]||0;
-      const used = Math.max(0, -bal);
-      const limit = c.creditLimit || 0;
-      const pct = limit>0 ? Math.min(100, Math.round((limit-used)/limit*100)) : 0;
-      return `<div style="margin-bottom:14px;cursor:pointer;" onclick="openAccountMovementsModal(${c.accountsTableID})">
-        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;"><span>${accountDisplayLabel(c)}</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;" class="muted"><span class="${used>0?'neg amount':''}">${used>0?'-'+fmtMoney(used,''):'$0.00'}</span><span>${fmtMoney(limit,'')}</span></div>
-        <div class="budget-bar-track"><div class="budget-bar-fill" style="width:${pct}%;"></div></div>
-      </div>`;
-    }).join('') : `<p class="faint">No hay cuentas con límite de crédito configurado.</p>`}
-  `));
-}
-
 /* --- Calendario --- */
 function renderCalendarWidget() {
   const dotsMap = computeCalendarDots(App.calMonth);
@@ -4927,7 +4938,7 @@ function tcmOpenCharge(id, accountId) {
         <datalist id="tcf-names">${getItemNamesRanked().slice(0,300).map(n=>`<option value="${escapeHtml(n)}">`).join('')}</datalist></div>
       <div class="field span-2"><label for="tcf-notes">Detalle (opcional)</label><textarea id="tcf-notes" rows="3" oninput="autoGrow(this)" placeholder="Qué compraste, para quién…">${escapeHtml(t?t.notes||'':'')}</textarea></div>
       <div class="field span-2"><label for="tcf-cat">Categoría</label>${catPickerField('tcf-cat', catId, { kind:'exp', onchange:'window.__tcmF.catTouched=true' })}</div>
-      <div class="field"><label for="tcf-cb">Cashback</label><input id="tcf-cb" type="number" step="0.0001" min="0" value="${t && t.cashback!=null ? t.cashback : ''}" oninput="window.__tcmF.cbTouched=true" placeholder="0.00"><span class="hint" id="tcf-cbhint"></span></div>
+      <div class="field"><label for="tcf-cb">Cashback</label><div class="cb-row"><input id="tcf-cb" type="number" step="0.0001" min="0" value="${t && t.cashback!=null ? t.cashback : ''}" oninput="window.__tcmF.cbTouched=true" placeholder="0.00"><button type="button" class="cb-calc-btn" onclick="tcmOpenCbCalc()" title="Calculadora de cashback" aria-label="Abrir calculadora de cashback"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><path d="M8.5 6.5h7"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01M8.5 14.5h.01M12 14.5h.01M15.5 14.5h.01M8.5 18h.01M12 18h.01M15.5 18h.01"/></svg></button></div><span class="hint" id="tcf-cbhint"></span></div>
       <div class="field"><label for="tcf-zero">Tasa cero</label><select id="tcf-zero"></select></div>
       ${people.length?`<div class="field span-2"><label>Asignar a personas (distribución)</label><div class="tcm-people" id="tcf-people">${people.map(p=>`<label><input type="checkbox" value="${escapeHtml(p.id)}" ${personas.includes(p.id)?'checked':''}> ${escapeHtml(p.name)}</label>`).join('')}</div></div>`:''}
     </div></div>
@@ -5672,7 +5683,7 @@ function tcmSaveCredit() {
    El mismo JSON sirve para descargarlo como respaldo y para guardarlo en
    un repositorio PRIVADO de GitHub mediante su API de contenidos.
    ===================================================================== */
-const OC_APP_VERSION = '7.3';
+const OC_APP_VERSION = '7.4';
 const BKP_FORMAT = 'owncoin-backup';
 
 /* ---------- JSON <-> base de datos ---------- */
@@ -7207,6 +7218,153 @@ function ocMonthSelectOptions(selected) {
   for (let i = 12; i >= -24; i--) out.push(ocYMAdd(now, i));
   if (selected && !out.includes(selected)) out.push(selected);
   return out.sort().reverse().map(ym=>`<option value="${ym}" ${ym===selected?'selected':''}>${ocYMLabel(ym)}</option>`).join('');
+}
+
+/* =====================================================================
+   CALCULADORA DE CASHBACK (v7.4)
+   Para tarjetas sin un porcentaje fijo: la compra se divide en tramos
+   (monto × %), se suman, y hay una línea de cálculo libre.
+   ===================================================================== */
+function cbcEval(expr) {
+  let s = String(expr || '').replace(/,/g, '.').replace(/\s+/g, '');
+  if (!s) return null;
+  if (!/^[0-9.+\-*/()%]+$/.test(s)) return NaN;
+  s = s.replace(/(\d+(?:\.\d+)?)%/g, '($1/100)');
+  if (/%/.test(s)) return NaN;
+  try { const v = Function('"use strict";return (' + s + ')')(); return (typeof v === 'number' && isFinite(v)) ? v : NaN; }
+  catch(e) { return NaN; }
+}
+function tcmOpenCbCalc() {
+  const card = tcmCards().find(c=>String(c.accountId)===(document.getElementById('tcf-card')||{}).value);
+  const amount = parseFloat((document.getElementById('tcf-amount')||{}).value) || '';
+  const rate = card && (card.loyalty==='cashback' || card.loyalty==='dolares_faciles') ? (Number(card.cbRate)||'') : '';
+  window.__cbc = { rows: [{ m: amount, p: rate }], free: '' };
+  let root = document.getElementById('catpick-root');
+  if (!root) { root = document.createElement('div'); root.id = 'catpick-root'; document.body.appendChild(root); }
+  root.className = 'catpick-backdrop open';
+  root.onpointerdown = (e)=>{ root.__downOnBackdrop = (e.target === root); };
+  root.onclick = (e)=>{ if (e.target === root && root.__downOnBackdrop) closeCatPicker(); };
+  root.innerHTML = `<div class="catpick-sheet cbc-sheet" role="dialog" aria-modal="true" aria-label="Calcular cashback">
+    <div class="catpick-top"><h3>Calcular cashback</h3><button type="button" class="modal-close" onclick="closeCatPicker()" aria-label="Cerrar">✕</button></div>
+    <div class="cbc-body">
+      <p class="hint" style="margin:0 0 10px;">${card ? escapeHtml(tcmCardName(card)) + (rate ? ` · ${TCM_LOYALTY[card.loyalty]} ${rate}%` : ' · sin porcentaje fijo') : ''}. Si la compra tiene partes con distinto porcentaje, agrega un tramo por cada parte.</p>
+      <div id="cbc-rows"></div>
+      <button type="button" class="cat-newgroup" onclick="cbcAddRow()">+ Agregar tramo</button>
+      <div class="cbc-chips" role="group" aria-label="Porcentajes rápidos">${[0.5,1,1.5,2,3,5,10].map(p=>`<button type="button" onclick="cbcQuick(${p})">${p}%</button>`).join('')}</div>
+      <div class="field" style="margin-top:12px;"><label for="cbc-free">Cálculo libre</label>
+        <input id="cbc-free" inputmode="decimal" autocomplete="off" placeholder="Ej. 45.80*3% + 12*1%" oninput="cbcRender()">
+        <span class="hint">Suma, resta, multiplica (*), divide (/) y usa % . Si escribes algo aquí, este resultado es el que se usa.</span></div>
+      <div class="cbc-total" id="cbc-total" role="status" aria-live="polite"></div>
+    </div>
+    <div class="modal-foot"><button class="btn ghost" onclick="closeCatPicker()">Cancelar</button><button class="btn primary" id="cbc-use" onclick="cbcUse()">Usar</button></div>
+  </div>`;
+  cbcRenderRows();
+  document.addEventListener('keydown', catPickEsc);
+  setTimeout(()=>{ const f = document.querySelector('#cbc-rows input'); if (f && window.matchMedia('(hover: hover)').matches) f.focus(); }, 40);
+}
+function cbcRenderRows() {
+  const C = window.__cbc;
+  document.getElementById('cbc-rows').innerHTML = C.rows.map((r,i)=>`<div class="cbc-row">
+      <div class="field cbc-fm"><label for="cbc-m-${i}">${C.rows.length>1?`Tramo ${i+1} · monto`:'Monto de la compra'}</label><input id="cbc-m-${i}" type="number" inputmode="decimal" step="0.01" min="0" value="${r.m}" oninput="window.__cbc.rows[${i}].m=this.value; window.__cbc.last=${i}; cbcRender()" onfocus="window.__cbc.last=${i}"></div>
+      <span class="cbc-x" aria-hidden="true">×</span>
+      <div class="field cbc-fp"><label for="cbc-p-${i}">% cashback</label><input id="cbc-p-${i}" type="number" inputmode="decimal" step="0.01" min="0" value="${r.p}" oninput="window.__cbc.rows[${i}].p=this.value; window.__cbc.last=${i}; cbcRender()" onfocus="window.__cbc.last=${i}"></div>
+      <span class="cbc-eq" id="cbc-r-${i}"></span>
+      ${C.rows.length>1?`<button type="button" class="icon-btn mini delete cbc-del" aria-label="Quitar tramo ${i+1}" onclick="cbcDelRow(${i})">✕</button>`:'<span class="cbc-del"></span>'}
+    </div>`).join('');
+  cbcRender();
+}
+function cbcAddRow() { window.__cbc.rows.push({ m:'', p:'' }); window.__cbc.last = window.__cbc.rows.length-1; cbcRenderRows(); const f = document.getElementById('cbc-m-'+window.__cbc.last); if (f) f.focus(); }
+function cbcDelRow(i) { window.__cbc.rows.splice(i,1); cbcRenderRows(); }
+function cbcQuick(p) {
+  const C = window.__cbc; const i = Math.min(C.last||0, C.rows.length-1);
+  C.rows[i].p = p; const el = document.getElementById('cbc-p-'+i); if (el) el.value = p; cbcRender();
+}
+function cbcCompute() {
+  const C = window.__cbc;
+  const freeTxt = (document.getElementById('cbc-free')||{}).value || '';
+  if (freeTxt.trim()) { const v = cbcEval(freeTxt); return { value: v, free:true }; }
+  let total = 0, base = 0;
+  C.rows.forEach(r=>{ const m = parseFloat(r.m)||0, p = parseFloat(r.p)||0; total += m*p/100; base += m; });
+  return { value: total, base, free:false };
+}
+function cbcRender() {
+  const C = window.__cbc;
+  C.rows.forEach((r,i)=>{ const el = document.getElementById('cbc-r-'+i); if (el) { const v = (parseFloat(r.m)||0)*(parseFloat(r.p)||0)/100; el.textContent = '= ' + tcmMoney(v); } });
+  const res = cbcCompute();
+  const tot = document.getElementById('cbc-total'), btn = document.getElementById('cbc-use');
+  if (res.value === null || res.value === undefined) { tot.innerHTML = ''; btn.disabled = true; return; }
+  if (isNaN(res.value)) { tot.innerHTML = `<span style="color:var(--danger)">Revisa el cálculo libre: solo números y + − × ÷ ( ) %</span>`; btn.disabled = true; return; }
+  const v = Math.round(res.value*100)/100;
+  const pctTxt = !res.free && res.base > 0 ? ` <span class="faint">· ${(res.value/res.base*100).toFixed(2)}% de la compra</span>` : '';
+  tot.innerHTML = `Cashback: <b>${tcmMoney(v)}</b>${pctTxt}`;
+  btn.disabled = v < 0; btn.textContent = `Usar ${tcmMoney(v)}`;
+}
+function cbcUse() {
+  const res = cbcCompute();
+  if (res.value == null || isNaN(res.value) || res.value < 0) return;
+  const v = Math.round(res.value*100)/100;
+  const input = document.getElementById('tcf-cb');
+  if (input) {
+    input.value = v.toFixed(2);
+    if (window.__tcmF) window.__tcmF.cbTouched = true;
+    const mr = document.getElementById('modal-root'); if (mr) mr.__dirty = true;
+  }
+  closeCatPicker();
+  if (input) input.focus();
+}
+
+/* =====================================================================
+   PIN CON TECLADO (v7.4)
+   En la pantalla de bloqueo se puede escribir el PIN con el teclado
+   (números, Retroceso para borrar, Esc para limpiar). En equipos sin lector
+   de huellas se muestra directamente el teclado del PIN.
+   ===================================================================== */
+document.addEventListener('keydown', (e)=>{
+  const ls = document.getElementById('lock-screen');
+  if (!ls || !ls.isConnected || getComputedStyle(ls).display === 'none') return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const pad = ls.querySelector('#pin-dots');
+  if (pad) {
+    if (/^[0-9]$/.test(e.key)) { e.preventDefault(); pinKeyFlash(e.key); pinKeyPress(e.key); }
+    else if (e.key === 'Backspace') { e.preventDefault(); pinKeyFlash('⌫'); pinKeyBackspace(); }
+    else if (e.key === 'Escape') { e.preventDefault(); window.__pinBuffer = ''; updatePinDots(); }
+  } else if (e.key === 'Enter' && ls.querySelector('[data-bio-unlock]')) {
+    e.preventDefault(); attemptBiometricUnlock();
+  }
+});
+function pinKeyFlash(label) {
+  const k = Array.from(document.querySelectorAll('#lock-screen .pin-key')).find(b=>b.textContent.trim()===label);
+  if (!k) return; k.classList.add('pressed'); setTimeout(()=>k.classList.remove('pressed'), 140);
+}
+
+/* =====================================================================
+   WIDGET "RESUMEN DE LA TARJETA DE CRÉDITO" (v7.4)
+   Muestra todas las tarjetas (las del módulo Tarjetas y las cuentas con
+   límite), aunque no tengan límite registrado.
+   ===================================================================== */
+function getCreditCardAccounts() {
+  const inModule = new Set();
+  try { if (tciTableExists('OC_TC_CARD')) dbAll(`SELECT accountId FROM OC_TC_CARD`).forEach(r=>inModule.add(r.accountId)); } catch(e) {}
+  return getAccounts(false).filter(a=>(a.creditLimit && a.creditLimit > 0) || inModule.has(a.accountsTableID));
+}
+function renderCreditCardWidget() {
+  const cards = getCreditCardAccounts();
+  const balances = getAllBalancesMap();
+  const row2 = document.getElementById('dash-widgets-row2');
+  row2.insertAdjacentHTML('beforeend', widgetCard('dash-cc', 'Resumen de la tarjeta de crédito', `
+    ${cards.length ? cards.map(c=>{
+      const bal = balances[c.accountsTableID]||0;
+      const used = Math.max(0, -bal);
+      const limit = c.creditLimit || 0;
+      const pct = limit>0 ? Math.min(100, Math.round((limit-used)/limit*100)) : 0;
+      return `<div style="margin-bottom:14px;cursor:pointer;" onclick="openAccountMovementsModal(${c.accountsTableID})">
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;"><span>${accountDisplayLabel(c)}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;" class="muted"><span class="${used>0?'neg amount':''}">${used>0?'-'+fmtMoney(used,''):'$0.00'}</span>
+          <span>${limit>0 ? fmtMoney(limit,'') : `<button type="button" class="cat-newgroup" style="margin:0;" onclick="event.stopPropagation(); tcmOpenCardForm(${c.accountsTableID})">Sin límite registrado · agregar</button>`}</span></div>
+        ${limit>0 ? `<div class="budget-bar-track"><div class="budget-bar-fill" style="width:${pct}%;"></div></div>` : ''}
+      </div>`;
+    }).join('') : `<p class="faint">No hay tarjetas registradas.</p>`}
+  `));
 }
 
 main();
