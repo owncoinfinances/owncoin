@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>🪙 OWNCOIN v7.6 — Gestor Financiero Personal</title>
+<title>🪙 OWNCOIN v7.7 — Gestor Financiero Personal</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1102,6 +1102,15 @@ html[data-theme="dark"] .cn-newgroup{ color:var(--gold-300); }
 
 /* ---------- v7.6 ---------- */
 .split-tag{ display:inline-block; font-size:10px; font-weight:800; letter-spacing:.4px; text-transform:uppercase; padding:1px 6px; border-radius:5px; background:var(--gold-100); color:var(--gold-600); border:1px solid var(--gold-300); margin-right:6px; vertical-align:1px; }
+.tcm-lines{ display:flex; flex-direction:column; gap:8px; }
+.tcm-line{ display:grid; grid-template-columns:minmax(0,1fr) 110px 32px; gap:8px; align-items:center; }
+.tcm-lines-foot{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-top:6px; }
+#tcf-amount.is-sum{ background:var(--bg); color:var(--ink-soft); }
+@media(max-width:420px){ .tcm-line{ grid-template-columns:minmax(0,1fr) 92px 30px; } }
+.fab-top.show{ }
+/* Con una ventana abierta: el botón flotante se oculta y los avisos suben para no tapar los botones de guardar */
+body:has(#modal-root.open) .fab-top{ display:none; }
+body:has(#modal-root.open) #toast-stack{ bottom:auto; top:calc(12px + env(safe-area-inset-top, 0px)); }
 .split-cats{ font-size:11.5px; color:var(--ink-soft); margin-top:2px; }
 </style>
 </head>
@@ -1126,7 +1135,7 @@ html[data-theme="dark"] .cn-newgroup{ color:var(--gold-300); }
 <!-- ===================== LANDING (choose DB source) ===================== -->
 <div id="landing">
   <div class="landing-card">
-    <div class="landing-mark">🪙 OWNCOIN <span style="color:var(--gold-600);">v7.6</span><span class="digits">Gestor financiero personal</span></div>
+    <div class="landing-mark">🪙 OWNCOIN <span style="color:var(--gold-600);">v7.7</span><span class="digits">Gestor financiero personal</span></div>
     <p class="landing-sub">Tus cuentas, tarjetas y presupuestos en un solo lugar, con respaldos en JSON y sincronización con tu GitHub privado.</p>
     <div class="landing-options">
       <div class="landing-opt" id="opt-new">
@@ -1155,7 +1164,7 @@ html[data-theme="dark"] .cn-newgroup{ color:var(--gold-300); }
   <div class="app-brand">
     <div class="mark">🪙</div>
     <div style="min-width:0;">
-      <div class="name">OWNCOIN <small>v7.6</small></div>
+      <div class="name">OWNCOIN <small>v7.7</small></div>
       <div class="tag" id="brand-filename">sin archivo</div>
       <div class="tag" id="autosave-indicator" style="color:#a9d6bb;">—</div>
     </div>
@@ -3757,7 +3766,8 @@ function bootApp() {
   if (typeof ghsPaintStatus === 'function') setTimeout(ghsPaintStatus, 0);
   if (typeof ocHashAction === 'function' && ocHashAction()) setTimeout(ocRunHashAction, 60);
   ocCategoryMaintenance();
-  if (App.undo && App.undo.forDb !== App.db) undoReset(); else undoPaint();
+  // el mantenimiento automático al abrir no cuenta como algo que el usuario pueda deshacer
+  if (App.undo && (App.undo.forDb !== App.db || App.__maintChanged)) { App.__maintChanged = false; undoReset(); } else undoPaint();
   document.getElementById('landing').classList.add('hidden');
   document.getElementById('app-topbar').classList.remove('hidden');
   document.getElementById('app-shell').classList.remove('hidden');
@@ -4735,7 +4745,7 @@ function tcmMovements(cards) {
   const byAcc = {}; cards.forEach(c=>byAcc[c.accountId] = c);
   const ids = cards.map(c=>c.accountId);
   const rows = dbAll(`SELECT tr.transactionsTableID id, tr.amount, tr.date, tr.transactionTypeID type, tr.accountID acc,
-      tr.accountPairID pair, tr.notes, tr.categoryID, tr.transferGroupID grp, i.itemName, c.childCategoryName cat,
+      tr.accountPairID pair, tr.notes, tr.categoryID, tr.transferGroupID grp, tr.newSplitTransactionID sgrp, i.itemName, c.childCategoryName cat,
       ap.accountName pairName, m.kind, m.stmt, m.cashback, m.tcCode, m.personas
     FROM TRANSACTIONSTABLE tr
     LEFT JOIN ITEMTABLE i ON i.itemTableID = tr.itemID
@@ -4881,7 +4891,8 @@ function tcmToggleCard(id) { const S = tcmState(); S.open[id] = !S.open[id]; ren
 function tcmMovLine(m, c) {
   const name = escapeHtml(m.itemName || (m.type===5 ? (m.value>=0?'Abono':'Transferencia') : 'Movimiento'));
   let meta = [];
-  if (m.kind==='charge') { if (m.cat) meta.push(escapeHtml(m.cat)); if (m.type===5) meta.push('Transferencia a ' + escapeHtml(m.pairName||'—')); }
+  if (m.__parts) meta.push(`<span class="split-tag">Split</span>${m.__parts.slice().sort((a,b)=>b.value-a.value).map(p=>escapeHtml(ocSplitCode(p.cat||'(sin categoría)').name)+' '+tcmMoney(p.value)).join(' · ')}`);
+  else if (m.kind==='charge') { if (m.cat) meta.push(escapeHtml(m.cat)); if (m.type===5) meta.push('Transferencia a ' + escapeHtml(m.pairName||'—')); }
   else if (m.type===5) meta.push('Desde ' + escapeHtml(accountDisplayLabel({accountName:m.pairName||'—'})));
   else meta.push((m.kind==='credit'?'Crédito':'Ingreso') + (m.cat?' · '+escapeHtml(m.cat):''));
   if (m.notes) meta.push(escapeHtml(m.notes));
@@ -4909,8 +4920,8 @@ function tcmCardDetail(c, s) {
       ${(s.cbEarned-s.cbUsed)>0.004?`<button class="btn ghost small" onclick="tcmOpenCbeForm(${c.accountId})">Canjear cashback</button>`:''}
       <button class="btn ghost small" onclick="tcmOpenCardForm(${c.accountId})">Ajustes de la tarjeta</button>
     </div>
-    <div class="tcm-sub">Cargos de ${tcmStmtLabel(tcmState().stmt)} <span>${s.charges.length} · ${tcmMoney(s.gasto)}${s.cbEarned>0?` · CB ${tcmMoney(s.cbEarned)}`:''}</span></div>
-    ${s.charges.length ? `<div class="tcm-list">${s.charges.map(m=>tcmMovLine(m,c)).join('')}</div>` : `<p class="hint">Sin cargos en este estado de cuenta.</p>`}
+    <div class="tcm-sub">Cargos de ${tcmStmtLabel(tcmState().stmt)} <span>${tcmCollapseCharges(s.charges).length} · ${tcmMoney(s.gasto)}${s.cbEarned>0?` · CB ${tcmMoney(s.cbEarned)}`:''}</span></div>
+    ${s.charges.length ? `<div class="tcm-list">${tcmCollapseCharges(s.charges).map(m=>tcmMovLine(m,c)).join('')}</div>` : `<p class="hint">Sin cargos en este estado de cuenta.</p>`}
     <div class="tcm-sub">Abonos <span>${s.payments.length} · ${tcmMoney(s.pagadoReal)}${s.prevSurplus>0?` + ${tcmMoney(s.prevSurplus)} de sobrante`:''}</span></div>
     ${s.payments.length ? `<div class="tcm-list">${s.payments.map(m=>tcmMovLine(m,c)).join('')}</div>
       ${s.payments.some(m=>m.day.slice(0,7)!==m.stmt && c.cutDay && Number(m.day.slice(8,10))>=c.cutDay)?`<p class="hint" style="margin-top:6px;">En naranja: abonos hechos después del corte siguiente que asignaste a este estado de cuenta.</p>`:''}` : `<p class="hint">Sin abonos para este estado de cuenta.</p>`}
@@ -4955,14 +4966,20 @@ function tcmOpenCharge(id, accountId) {
   const card = cards.find(c=>String(c.accountId)===String(accountId || App.tcmLastCard)) || cards[0];
   const day = t ? t.date.slice(0,10) : tcmToday();
   const time = t ? t.date.slice(11,16) : tcmNowTime();
-  const amount = t ? Math.abs(t.amount/SCALE) : '';
+  let amount = t ? Math.abs(t.amount/SCALE) : '';
   const stmt = (t && t.stmt) || tcmChargeStmt(day, card.cutDay);
   let personas = []; try { personas = t && t.personas ? JSON.parse(t.personas) : []; } catch(e) {}
   const cats = tciCategories();
   // si el cargo tenía una categoría que no es de Gastos (p. ej. Transferir), se propone Sin Categoría
   const catId = t && tciIsExpenseCat(t.categoryID) && !/sin categor/i.test((ocCatById(t.categoryID)||{}).childCategoryName||'') ? t.categoryID : null;
   const people = tcmPeople();
-  window.__tcmF = { kind:'charge', id, catTouched: !!t, cbTouched: !!(t && t.cashback!=null), stmtTouched: !!(t && t.stmt), time0: time, cardTouched: !!t };
+  // ¿es parte de un cargo dividido? entonces se editan todas sus líneas
+  const parts = t && t.newSplitTransactionID ? dbAll(`SELECT tr.transactionsTableID id, tr.categoryID, tr.amount, m.cashback FROM TRANSACTIONSTABLE tr LEFT JOIN OC_TC_TXN m ON m.txnId=tr.transactionsTableID
+      WHERE tr.newSplitTransactionID=? AND tr.deletedTransaction=6 AND tr.accountID=? ORDER BY tr.transactionsTableID`, [t.newSplitTransactionID, t.accountID]) : [];
+  const isSplit = parts.length > 1;
+  window.__tcmF = { kind:'charge', id, catTouched: !!t, cbTouched: !!(t && t.cashback!=null), stmtTouched: !!(t && t.stmt), time0: time, cardTouched: !!t,
+    cat0: catId, group: isSplit ? t.newSplitTransactionID : 0, splitIds: isSplit ? parts.map(p=>p.id) : (id ? [id] : []),
+    lines: isSplit ? parts.map(p=>({ categoryId: tciIsExpenseCat(p.categoryID) ? String(p.categoryID) : '', amount: Math.abs(p.amount/SCALE).toFixed(2) })) : null };
   openModal(`<div class="modal">
     <div class="modal-head"><h3>${id?'Editar cargo':'Registrar cargo'}</h3><button class="modal-close" onclick="closeModal()" aria-label="Cerrar">✕</button></div>
     <div class="modal-body"><div class="form-grid">
@@ -4973,7 +4990,7 @@ function tcmOpenCharge(id, accountId) {
       <div class="field span-2"><label for="tcf-name">Descripción</label><input id="tcf-name" list="tcf-names" value="${escapeHtml(t?t.itemName||'':'')}" oninput="tcmChargeRecalc('name')" placeholder="Comercio o concepto" autocomplete="off">
         <datalist id="tcf-names">${getItemNamesRanked().slice(0,300).map(n=>`<option value="${escapeHtml(n)}">`).join('')}</datalist></div>
       <div class="field span-2"><label for="tcf-notes">Detalle (opcional)</label><textarea id="tcf-notes" rows="3" oninput="autoGrow(this)" placeholder="Qué compraste, para quién…">${escapeHtml(t?t.notes||'':'')}</textarea></div>
-      <div class="field span-2"><label for="tcf-cat">Categoría</label>${catPickerField('tcf-cat', catId, { kind:'exp', onchange:'window.__tcmF.catTouched=true' })}</div>
+      <div class="field span-2" id="tcf-catwrap"></div>
       <div class="field"><label for="tcf-cb">Cashback</label><div class="cb-row"><input id="tcf-cb" type="number" step="0.0001" min="0" value="${t && t.cashback!=null ? t.cashback : ''}" oninput="window.__tcmF.cbTouched=true" placeholder="0.00"><button type="button" class="cb-calc-btn" onclick="tcmOpenCbCalc()" title="Calculadora de cashback" aria-label="Abrir calculadora de cashback"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><path d="M8.5 6.5h7"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01M8.5 14.5h.01M12 14.5h.01M15.5 14.5h.01M8.5 18h.01M12 18h.01M15.5 18h.01"/></svg></button></div><span class="hint" id="tcf-cbhint"></span></div>
       <div class="field"><label for="tcf-zero">Tasa cero</label><select id="tcf-zero"></select></div>
       ${people.length?`<div class="field span-2"><label>Asignar a personas (distribución)</label><div class="tcm-people" id="tcf-people">${people.map(p=>`<label><input type="checkbox" value="${escapeHtml(p.id)}" ${personas.includes(p.id)?'checked':''}> ${escapeHtml(p.name)}</label>`).join('')}</div></div>`:''}
@@ -4981,9 +4998,18 @@ function tcmOpenCharge(id, accountId) {
     <div class="modal-foot">
       ${id?`<button class="btn danger" onclick="tcmDeleteMov(${id})">Eliminar</button><button class="btn ghost" onclick="tcmCopyMov(${id})">Copiar</button>`:''}
       <button class="btn ghost" onclick="closeModal()">Cancelar</button>
-      <button class="btn primary" onclick="tcmSaveCharge(false)">${id?'Guardar cambios':'Registrar cargo'}</button>
+      <button class="btn primary" onclick="tcmSaveCharge()">${id?'Guardar cambios':'Registrar cargo'}</button>
     </div></div>`);
   tcmFillZeroSelect(card.accountId, t ? t.tcCode : '');
+  tcmRenderCatArea();
+  if (window.__tcmF.lines) { const sum = window.__tcmF.lines.reduce((s,l)=>s+(parseFloat(l.amount)||0),0); document.getElementById('tcf-amount').value = sum.toFixed(2);
+    const cbSum = parts.reduce((s,p)=>s+(Number(p.cashback)||0),0); if (window.__tcmF.cbTouched) document.getElementById('tcf-cb').value = Math.round(cbSum*10000)/10000; }
+  // El cashback guardado solo se respeta si se había puesto a mano; si coincide con el cálculo automático, se recalcula al cambiar el monto
+  if (id && window.__tcmF.cbTouched) {
+    const total = parseFloat(document.getElementById('tcf-amount').value) || 0;
+    const stored = parseFloat(document.getElementById('tcf-cb').value) || 0;
+    window.__tcmF.cbTouched = Math.abs(tcmCalcCB(card, total) - stored) > 0.005;
+  }
   tcmChargeRecalc('init');
   autoGrowAll();
   if (!id) setTimeout(()=>{ const a = document.getElementById('tcf-amount'); if (a) a.focus(); }, 50);
@@ -5017,47 +5043,137 @@ function tcmChargeRecalc(what) {
     const rules = tciGetConfig('merchantRules', {});
     if (!App.tcmLearned) App.tcmLearned = tciLearnFromHistory();
     const cat = [rules[key], App.tcmLearned[key]].find(c=>c && tciIsExpenseCat(c));
-    if (cat) catPickSet('tcf-cat', cat);
+    if (cat && !F.lines) catPickSet('tcf-cat', cat);
   }
 }
-function tcmSaveCharge(asNew) {
+function tcmSaveCharge() {
   const F = window.__tcmF;
   const accountId = Number(document.getElementById('tcf-card').value);
-  const amount = parseFloat(document.getElementById('tcf-amount').value);
   const day = document.getElementById('tcf-date').value;
   const name = document.getElementById('tcf-name').value.trim();
-  if (!(amount>0)) { showToast('Escribe el monto del cargo.', 'error'); return; }
+  // líneas: una sola (categoría + monto) o varias (cargo dividido)
+  let lines;
+  if (F.lines) {
+    lines = F.lines.filter(l=>l.categoryId!=='' || parseFloat(l.amount)>0);
+    if (lines.some(l=>l.categoryId==='')) { showToast('Cada línea necesita su categoría.', 'error'); return; }
+    if (lines.some(l=>!(parseFloat(l.amount)>0))) { showToast('Cada línea necesita un monto mayor que cero.', 'error'); return; }
+  } else {
+    const amount = parseFloat(document.getElementById('tcf-amount').value);
+    if (!(amount>0)) { showToast('Escribe el monto del cargo.', 'error'); return; }
+    if (document.getElementById('tcf-cat').value === '') { showToast('Elige la categoría del cargo.', 'error'); return; }
+    lines = [{ categoryId: document.getElementById('tcf-cat').value, amount: String(amount) }];
+  }
+  if (!lines.length) { showToast('Escribe el monto del cargo.', 'error'); return; }
   if (!day) { showToast('Elige la fecha del cargo.', 'error'); return; }
   if (!name) { showToast('Escribe una descripción para reconocer el cargo.', 'error'); return; }
-  if (document.getElementById('tcf-cat').value === '') { showToast('Elige la categoría del cargo.', 'error'); return; }
-  const categoryId = Number(document.getElementById('tcf-cat').value);
+  const total = lines.reduce((s,l)=>s+parseFloat(l.amount),0);
   const stmt = document.getElementById('tcf-stmt').value;
   const cbRaw = document.getElementById('tcf-cb').value;
   const cashback = cbRaw==='' ? 0 : Number(cbRaw)||0;
   const tcCode = document.getElementById('tcf-zero').value || null;
-  const personas = Array.from(document.querySelectorAll('#tcf-people input:checked')).map(i=>i.value);
-  const dateStr = `${day} ${ocSaveTime('tcf-time','tcf-date', !F.id || asNew, F.time0)}:00.000`;
+  const personas = JSON.stringify(Array.from(document.querySelectorAll('#tcf-people input:checked')).map(i=>i.value));
+  const dateStr = `${day} ${ocSaveTime('tcf-time','tcf-date', !F.id, F.time0)}:00.000`;
   const notes = document.getElementById('tcf-notes').value.trim();
   const itemId = getOrCreateItemId(name);
-  const wasRefund = F.id && (dbOne(`SELECT amount FROM TRANSACTIONSTABLE WHERE transactionsTableID=?`, [F.id])||{}).amount > 0;
-  const scaled = (wasRefund && !asNew ? 1 : -1) * Math.round(amount*SCALE);
-  let id = F.id;
-  if (id && !asNew) {
-    dbRun(`UPDATE TRANSACTIONSTABLE SET amount=?, date=?, categoryID=?, accountID=?, notes=?, itemID=? WHERE transactionsTableID=?`,
-      [scaled, dateStr, categoryId, accountId, notes, itemId, id]);
-  } else {
-    id = insertTransaction({ amount:scaled, currency:'USD', date:dateStr, typeId:TXN_TYPE.GASTO, categoryId, accountId, notes, itemId });
-  }
-  dbRun(`INSERT OR REPLACE INTO OC_TC_TXN (txnId, accountId, kind, stmt, cashback, tcCode, personas) VALUES (?,?,?,?,?,?,?)`,
-    [id, accountId, 'charge', stmt, cashback, tcCode, JSON.stringify(personas)]);
-  if (F.catTouched && tciIsExpenseCat(categoryId)) {
+  const ids = F.splitIds || [];
+  const wasRefund = F.id && lines.length===1 && (dbOne(`SELECT amount FROM TRANSACTIONSTABLE WHERE transactionsTableID=?`, [F.id])||{}).amount > 0;
+  const group = lines.length > 1 ? (F.group || Date.now()) : 0;
+  // el cashback se reparte entre las líneas en proporción a su monto
+  let cbLeft = cashback;
+  const savedIds = [];
+  App.db.run('BEGIN');
+  try {
+    lines.forEach((l, i)=>{
+      const amt = parseFloat(l.amount);
+      const scaled = (wasRefund ? 1 : -1) * Math.round(amt*SCALE);
+      const cb = i === lines.length-1 ? Math.round(cbLeft*10000)/10000 : Math.round(cashback*amt/total*10000)/10000;
+      cbLeft -= cb;
+      let id = ids[i];
+      if (id) App.db.run(`UPDATE TRANSACTIONSTABLE SET amount=?, date=?, transactionTypeID=?, categoryID=?, accountID=?, notes=?, itemID=?, newSplitTransactionID=? WHERE transactionsTableID=?`,
+        [scaled, dateStr, TXN_TYPE.GASTO, Number(l.categoryId), accountId, notes, itemId, group, id]);
+      else id = insertTransaction({ amount:scaled, currency:'USD', date:dateStr, typeId:TXN_TYPE.GASTO, categoryId:Number(l.categoryId), accountId, notes, itemId, splitId:group });
+      App.db.run(`INSERT OR REPLACE INTO OC_TC_TXN (txnId, accountId, kind, stmt, cashback, tcCode, personas) VALUES (?,?,?,?,?,?,?)`,
+        [id, accountId, 'charge', stmt, cb, tcCode, personas]);
+      savedIds.push(id);
+    });
+    ids.slice(lines.length).forEach(id=>{
+      App.db.run(`UPDATE TRANSACTIONSTABLE SET deletedTransaction=5 WHERE transactionsTableID=?`, [id]);
+      App.db.run(`DELETE FROM OC_TC_TXN WHERE txnId=?`, [id]);
+    });
+    App.db.run('COMMIT');
+  } catch (err) { try { App.db.run('ROLLBACK'); } catch(e) {} showToast('No se pudo guardar: ' + err.message, 'error'); return; }
+  scheduleAutosave();
+  if (lines.length === 1 && F.catTouched && tciIsExpenseCat(lines[0].categoryId)) {
     tciEnsureTables();
-    const rules = tciGetConfig('merchantRules', {}); rules[tciMerchantKey(name)] = String(categoryId); tciSetConfig('merchantRules', rules);
+    const rules = tciGetConfig('merchantRules', {}); rules[tciMerchantKey(name)] = String(lines[0].categoryId); tciSetConfig('merchantRules', rules);
   }
   const S = tcmState(); S.open[accountId] = true; App.tcmLastCard = accountId;
   closeModal();
-  showToast(F.id && !asNew ? 'Cargo actualizado.' : `Cargo registrado en ${tcmStmtLabel(stmt)}.`, 'success');
+  const how = lines.length > 1 ? ` dividido en ${lines.length} categorías` : '';
+  showToast(F.id ? `Cargo actualizado${how}.` : `Cargo registrado${how} en ${tcmStmtLabel(stmt)}.`, 'success');
   tcmAfterChange();
+}
+
+/* ---------- categoría del cargo: una o varias líneas (cargo dividido) ---------- */
+function tcmRenderCatArea() {
+  const F = window.__tcmF;
+  const wrap = document.getElementById('tcf-catwrap'); if (!wrap) return;
+  const amountEl = document.getElementById('tcf-amount');
+  if (!F.lines) {
+    const cur = document.getElementById('tcf-cat') ? document.getElementById('tcf-cat').value : (F.cat0 != null ? F.cat0 : '');
+    wrap.innerHTML = `<label for="tcf-cat">Categoría</label>${catPickerField('tcf-cat', cur, { kind:'exp', onchange:'window.__tcmF.catTouched=true' })}
+      <button type="button" class="cat-newgroup" onclick="tcmSplitStart()">÷ Dividir en varias categorías</button>`;
+    if (amountEl) { amountEl.readOnly = false; amountEl.classList.remove('is-sum'); }
+    return;
+  }
+  wrap.innerHTML = `<label>Categorías del cargo <span class="split-tag" style="margin-left:4px;">Split</span></label>
+    <div class="tcm-lines">${F.lines.map((l,i)=>`<div class="tcm-line">
+      <div class="tcm-line-cat">${catPickerField('tcf-line-cat-'+i, l.categoryId, { kind:'exp', placeholder:'Categoría…', onchange:`window.__tcmF.lines[${i}].categoryId=value` })}</div>
+      <input type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" value="${l.amount}" aria-label="Monto de la línea ${i+1}" oninput="window.__tcmF.lines[${i}].amount=this.value; tcmLinesChanged()">
+      <button type="button" class="icon-btn mini delete" aria-label="Quitar línea ${i+1}" onclick="tcmLineRemove(${i})">✕</button></div>`).join('')}</div>
+    <div class="tcm-lines-foot"><button type="button" class="cat-newgroup" onclick="tcmLineAdd()">+ Agregar línea</button><span class="hint" id="tcf-lines-total"></span></div>`;
+  if (amountEl) { amountEl.readOnly = true; amountEl.classList.add('is-sum'); }
+  tcmLinesChanged(true);
+}
+function tcmSplitStart() {
+  const F = window.__tcmF;
+  const cat = (document.getElementById('tcf-cat')||{}).value || '';
+  const amt = (document.getElementById('tcf-amount')||{}).value || '';
+  F.lines = [{ categoryId: cat, amount: amt }, { categoryId:'', amount:'' }];
+  tcmRenderCatArea();
+  const inputs = document.querySelectorAll('.tcm-line input[type=number]'); if (inputs[1]) inputs[1].focus();
+}
+function tcmLineAdd() { const F = window.__tcmF; F.lines.push({ categoryId:'', amount:'' }); tcmRenderCatArea(); const inputs = document.querySelectorAll('.tcm-line input[type=number]'); inputs[inputs.length-1].focus(); }
+function tcmLineRemove(i) {
+  const F = window.__tcmF;
+  F.lines.splice(i, 1);
+  if (F.lines.length <= 1) {
+    const only = F.lines[0] || { categoryId:'', amount:'' };
+    F.lines = null; F.cat0 = only.categoryId;
+    tcmRenderCatArea();
+    document.getElementById('tcf-amount').value = only.amount;
+    tcmChargeRecalc('amount');
+    return;
+  }
+  tcmRenderCatArea();
+}
+function tcmLinesChanged(silent) {
+  const F = window.__tcmF; if (!F.lines) return;
+  const sum = F.lines.reduce((s,l)=>s+(parseFloat(l.amount)||0),0);
+  const amountEl = document.getElementById('tcf-amount'); if (amountEl) amountEl.value = sum ? sum.toFixed(2) : '';
+  const tot = document.getElementById('tcf-lines-total'); if (tot) tot.textContent = `Total: ${tcmMoney(sum)} · el monto del cargo es la suma de las líneas`;
+  if (!silent) { tcmChargeRecalc('amount'); const mr = document.getElementById('modal-root'); if (mr) mr.__dirty = true; }
+}
+/* En el estado de cuenta, las líneas de un cargo dividido se muestran juntas */
+function tcmCollapseCharges(list) {
+  const out = [], seen = {};
+  list.forEach(m=>{
+    if (!m.sgrp || m.kind !== 'charge') { out.push(m); return; }
+    if (seen[m.sgrp]) { const g = seen[m.sgrp]; g.__parts.push(m); g.value += m.value; g.cashback += (m.cashback||0); return; }
+    const g = Object.assign({}, m, { __parts:[m], cashback: m.cashback||0 }); seen[m.sgrp] = g; out.push(g);
+  });
+  out.forEach(g=>{ if (g.__parts && g.__parts.length === 1) delete g.__parts; });
+  return out;
 }
 
 /* ---------- formulario: abono ---------- */
@@ -5726,7 +5842,7 @@ function tcmSaveCredit() {
    El mismo JSON sirve para descargarlo como respaldo y para guardarlo en
    un repositorio PRIVADO de GitHub mediante su API de contenidos.
    ===================================================================== */
-const OC_APP_VERSION = '7.6';
+const OC_APP_VERSION = '7.7';
 const BKP_FORMAT = 'owncoin-backup';
 
 /* ---------- JSON <-> base de datos ---------- */
@@ -6493,7 +6609,7 @@ function ocCategoryMaintenance() {
     const tid = ocTransferCategoryId();
     if (tid) {
       const n = dbOne(`SELECT COUNT(*) n FROM TRANSACTIONSTABLE WHERE transactionTypeID=5 AND categoryID<>?`, [tid]).n;
-      if (n) App.db.run(`UPDATE TRANSACTIONSTABLE SET categoryID=? WHERE transactionTypeID=5 AND categoryID<>?`, [tid, tid]);
+      if (n) { App.db.run(`UPDATE TRANSACTIONSTABLE SET categoryID=? WHERE transactionTypeID=5 AND categoryID<>?`, [tid, tid]); scheduleAutosave(); App.__maintChanged = true; }
     }
     const empties = dbAll(`SELECT c.categoryTableID id, c.childCategoryName name FROM CHILDCATEGORYTABLE c
       WHERE TRIM(c.childCategoryName) IN ('(Sin Categoría)','(Sin Categoria)')
@@ -6502,8 +6618,8 @@ function ocCategoryMaintenance() {
     empties.forEach(e=>{
       ocRemoveCategoryRow(e.id); removed++;
     });
-    if (typeof ocNormalizeSingleSplits === 'function' && ocNormalizeSingleSplits()) scheduleAutosave();
-    if (removed) { scheduleAutosave(); setTimeout(()=>showToast(removed===1 ? 'Se eliminó una categoría “(Sin Categoría)” que no tenía movimientos.' : `Se eliminaron ${removed} categorías “(Sin Categoría)” que no tenían movimientos.`, 'success'), 800); }
+    if (typeof ocNormalizeSingleSplits === 'function' && ocNormalizeSingleSplits()) { scheduleAutosave(); App.__maintChanged = true; }
+    if (removed) { scheduleAutosave(); App.__maintChanged = true; setTimeout(()=>showToast(removed===1 ? 'Se eliminó una categoría “(Sin Categoría)” que no tenía movimientos.' : `Se eliminaron ${removed} categorías “(Sin Categoría)” que no tenían movimientos.`, 'success'), 800); }
   } catch (e) { console.warn('Mantenimiento de categorías:', e); }
 }
 
@@ -7595,8 +7711,15 @@ function tcmFillChargeFrom(row, all) {
   const F = window.__tcmF; if (!F || F.id) return;
   const v = id => (document.getElementById(id)||{}).value || '';
   if (all || !F.cardTouched) { F.__prog = true; accPickSet('tcf-card', row.accountID, true); F.__prog = false; }
-  if (all || !v('tcf-amount')) { document.getElementById('tcf-amount').value = Math.abs(row.amount/SCALE).toFixed(2); }
-  if ((all || !v('tcf-cat')) && tciIsExpenseCat(row.categoryID)) catPickSet('tcf-cat', row.categoryID);
+  // si aquel cargo estaba dividido en categorías, se traen todas sus líneas
+  const parts = row.newSplitTransactionID ? dbAll(`SELECT categoryID, amount FROM TRANSACTIONSTABLE WHERE newSplitTransactionID=? AND deletedTransaction=6 AND accountID=? ORDER BY transactionsTableID`, [row.newSplitTransactionID, row.accountID]) : [];
+  if (parts.length > 1 && (all || (!v('tcf-amount') && !F.lines))) {
+    F.lines = parts.map(p=>({ categoryId: tciIsExpenseCat(p.categoryID) ? String(p.categoryID) : '', amount: Math.abs(p.amount/SCALE).toFixed(2) }));
+    tcmRenderCatArea();
+  } else {
+    if (all || !v('tcf-amount')) { document.getElementById('tcf-amount').value = Math.abs(row.amount/SCALE).toFixed(2); }
+    if (!F.lines && (all || !v('tcf-cat')) && tciIsExpenseCat(row.categoryID)) catPickSet('tcf-cat', row.categoryID);
+  }
   if (all || !v('tcf-name')) document.getElementById('tcf-name').value = row.itemName || '';
   if ((all || !v('tcf-notes').trim()) && row.notes) { document.getElementById('tcf-notes').value = row.notes; autoGrowAll(); }
   if (row.tcCode) { const z = document.getElementById('tcf-zero'); if (z && Array.from(z.options).some(o=>o.value===row.tcCode)) z.value = row.tcCode; }

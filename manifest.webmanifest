@@ -57,19 +57,6 @@
       ]
     },
     {
-      "name": "Nuevo abono a tarjeta",
-      "short_name": "Abono",
-      "description": "Registrar un pago a una tarjeta",
-      "url": "./#abono",
-      "icons": [
-        {
-          "src": "icons/sc-abono.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
       "name": "Tarjetas",
       "short_name": "Tarjetas",
       "description": "Ver el estado de cuenta de tus tarjetas",
@@ -77,6 +64,19 @@
       "icons": [
         {
           "src": "icons/sc-tarjetas.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Nuevo abono a tarjeta",
+      "short_name": "Abono",
+      "description": "Registrar un pago a una tarjeta",
+      "url": "./#abono",
+      "icons": [
+        {
+          "src": "icons/sc-abono.png",
           "sizes": "192x192",
           "type": "image/png"
         }
