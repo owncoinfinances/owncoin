@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>🪙 OWNCOIN v7.4 — Gestor Financiero Personal</title>
+<title>🪙 OWNCOIN v7.5 — Gestor Financiero Personal</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1083,6 +1083,22 @@ html[data-palette="grises"]:not([data-theme="dark"]) .app-topbar .pill-item.acti
 .pin-key:focus-visible{ outline:none; box-shadow:0 0 0 3px var(--ring); }
 .lock-kbd{ display:none; margin-top:12px; }
 @media (hover: hover) and (pointer: fine){ .lock-kbd{ display:block; } .pin-key{ width:60px; height:60px; font-size:20px; } .pin-keypad{ grid-template-columns:repeat(3, 60px); } }
+
+/* ---------- v7.5 ---------- */
+/* sin "deslizar para recargar" del navegador */
+html, body{ overscroll-behavior-y:none; }
+.catpick-foot{ border-top:1px solid var(--line); padding:10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); display:flex; justify-content:center; }
+.catpick-foot .btn{ width:100%; justify-content:center; }
+.cn-groups{ display:flex; flex-direction:column; gap:4px; max-height:200px; overflow-y:auto; border:1.5px solid var(--line); border-radius:10px; padding:4px; }
+.cn-group{ text-align:left; border:none; background:none; padding:9px 10px; border-radius:8px; cursor:pointer; color:var(--ink); font-family:var(--font-body); font-size:13.5px; }
+.cn-group:hover{ background:var(--hover-bg); }
+.cn-group.active{ background:var(--gold-100); font-weight:700; }
+.cn-newgroup{ color:var(--navy-700); font-weight:700; }
+html[data-theme="dark"] .cn-newgroup{ color:var(--gold-300); }
+.oc-prefill-hint{ display:block; color:var(--ok); margin-top:4px; }
+.tcm-li.tcm-li-copy{ grid-template-columns:78px minmax(0,1fr) auto 30px; }
+.tcm-copy{ width:28px; height:28px; padding:0; justify-content:center; }
+@media(max-width:560px){ .tcm-li.tcm-li-copy{ grid-template-columns:minmax(0,1fr) auto 30px; } }
 </style>
 </head>
 <script>
@@ -1106,7 +1122,7 @@ html[data-palette="grises"]:not([data-theme="dark"]) .app-topbar .pill-item.acti
 <!-- ===================== LANDING (choose DB source) ===================== -->
 <div id="landing">
   <div class="landing-card">
-    <div class="landing-mark">🪙 OWNCOIN <span style="color:var(--gold-600);">v7.4</span><span class="digits">Gestor financiero personal</span></div>
+    <div class="landing-mark">🪙 OWNCOIN <span style="color:var(--gold-600);">v7.5</span><span class="digits">Gestor financiero personal</span></div>
     <p class="landing-sub">Tus cuentas, tarjetas y presupuestos en un solo lugar, con respaldos en JSON y sincronización con tu GitHub privado.</p>
     <div class="landing-options">
       <div class="landing-opt" id="opt-new">
@@ -1135,7 +1151,7 @@ html[data-palette="grises"]:not([data-theme="dark"]) .app-topbar .pill-item.acti
   <div class="app-brand">
     <div class="mark">🪙</div>
     <div style="min-width:0;">
-      <div class="name">OWNCOIN <small>v7.4</small></div>
+      <div class="name">OWNCOIN <small>v7.5</small></div>
       <div class="tag" id="brand-filename">sin archivo</div>
       <div class="tag" id="autosave-indicator" style="color:#a9d6bb;">—</div>
     </div>
@@ -1307,6 +1323,7 @@ async function idbDelete(key) {
   });
 }
 function scheduleAutosave() {
+  App.__savePending = true;
   clearTimeout(__autosaveTimer);
   __autosaveTimer = setTimeout(persistCurrentDatabase, 450);
 }
@@ -1318,6 +1335,7 @@ async function persistCurrentDatabase() {
     const bytes = App.db.export();
     await idbPut(IDB_KEY, { fileName: App.fileName, bytes, savedAt: Date.now() });
     setAutosaveIndicator('saved');
+    App.__savePending = false;
     if (typeof undoOnPersist === 'function') undoOnPersist(bytes);
     if (!App.__noDirty && typeof ghsMarkDirty === 'function') ghsMarkDirty();
   } catch (e) {
@@ -1435,6 +1453,7 @@ async function disableSecurity() {
 async function maybeShowLockScreen() {
   const cfg = await getSecurityConfig();
   if (!cfg.enabled) { App.securityUnlocked = true; return; }
+  if (ocRecentlyUnlocked()) { App.securityUnlocked = true; ocTouchUnlock(); return; }
   App.securityUnlocked = false;
   renderLockScreen(cfg);
 }
@@ -1538,6 +1557,7 @@ function confirmForgotPin() {
 }
 function unlockApp() {
   App.securityUnlocked = true;
+  ocTouchUnlock();
   const root = document.getElementById('lock-screen');
   if (root) root.remove();
   bootApp();
@@ -1674,7 +1694,7 @@ function dateToDbStr(dateInputVal, timeVal) {
   return `${dateInputVal} ${time}:00.000`;
 }
 function dbStrToDateInput(s) {
-  if (!s) return { date: ocLocalDay(), time:'12:00' };
+  if (!s) return { date: ocLocalDay(), time: ocNowHM() };
   const [datePart, timePart] = s.split(' ');
   return { date: datePart, time: (timePart||'12:00').slice(0,5) };
 }
@@ -2984,6 +3004,7 @@ function openTxnModal(id=null, copySource=null, preset=null) {
         <div id="txn-form-body"></div>
       </div>
       <div class="modal-foot">
+        ${id && t.transactionTypeID !== 2 ? `<button class="btn ghost" onclick="duplicateTransaction(${id})" title="Crear una transacción igual con la fecha de hoy">Copiar</button>` : ''}
         <button class="btn ghost" onclick="closeModal()">Cancelar</button>
         <button class="btn primary" onclick="submitTxnForm()">Guardar</button>
       </div>
@@ -3071,7 +3092,8 @@ function selectTxnNameSuggestion(el) {
   const input = document.getElementById('f-txn-name');
   input.value = el.getAttribute('data-name');
   document.getElementById('txn-name-suggestions').classList.remove('open');
-  input.focus();
+  ocPrefillTxnFromName(input.value);
+  const again = document.getElementById('f-txn-name'); if (again) again.focus();
 }
 function handleTxnNameKeydown(ev) {
   const box = document.getElementById('txn-name-suggestions');
@@ -3183,7 +3205,7 @@ function submitTxnForm() {
         id: ctx.t ? ctx.t.transactionsTableID : null,
         fromAccountId, toAccountId, amount,
         date: document.getElementById('f-txn-date').value,
-        time: document.getElementById('f-txn-time').value,
+        time: ocTxnTime(),
         notes: document.getElementById('f-txn-notes').value,
         currency: 'USD',
         itemName
@@ -3195,7 +3217,7 @@ function submitTxnForm() {
       saveSplitTransaction({
         type, accountId: parseInt(document.getElementById('f-txn-account').value,10),
         date: document.getElementById('f-txn-date').value,
-        time: document.getElementById('f-txn-time').value,
+        time: ocTxnTime(),
         notes: document.getElementById('f-txn-notes').value,
         currency: document.getElementById('f-txn-currency').value || 'USD',
         splits: valid,
@@ -3211,7 +3233,7 @@ function submitTxnForm() {
         type, accountId: parseInt(document.getElementById('f-txn-account').value,10),
         categoryId: (()=>{ const v = document.getElementById('f-txn-category').value; if (v==='') throw new Error('Elige una categoría.'); return parseInt(v,10); })(),
         amount, date: document.getElementById('f-txn-date').value,
-        time: document.getElementById('f-txn-time').value,
+        time: ocTxnTime(),
         notes: document.getElementById('f-txn-notes').value,
         currency: document.getElementById('f-txn-currency').value || 'USD',
         itemName
@@ -3622,6 +3644,7 @@ function setZoom(z) {
   showToast(`Tamaño de letra: ${({0.9:'pequeño',1:'normal',1.12:'grande',1.25:'muy grande'})[z]}.`, 'success');
 }
 function lockNow() {
+  ocClearUnlock();
   getSecurityConfig().then(cfg=>{
     if (!cfg.enabled) { showToast('Primero activa un método de bloqueo.', 'error'); return; }
     App.securityUnlocked = false;
@@ -3845,7 +3868,8 @@ async function main() {
   const restored = await tryRestoreAutosave();
   if (restored) {
     await proceedToApp();
-    if (App.securityUnlocked && !ghsReady()) showToast('Sesión recuperada de este navegador.', 'success');
+    if (App.securityUnlocked && ocWasReloaded()) showToast('La página se recargó. Todo lo que habías guardado sigue aquí.', 'info');
+    else if (App.securityUnlocked && !ghsReady()) showToast('Sesión recuperada de este navegador.', 'success');
   }
   // Al abrir: si hay GitHub configurado, traer lo que otro dispositivo haya subido
   if (ghsReady() && App.securityUnlocked !== false) ghsSync('open');
@@ -4852,10 +4876,11 @@ function tcmMovLine(m, c) {
   if (m.notes) meta.push(escapeHtml(m.notes));
   const tags = (m.tcCode?`<span class="tcm-tag">${escapeHtml(m.tcCode)}</span>`:'') + (m.personas.length?`<span class="tcm-tag">${m.personas.length} pers.</span>`:'');
   const post = m.kind==='payment' && c.cutDay && Number(m.day.slice(8,10))>=c.cutDay && m.day.slice(0,7)!==m.stmt;
-  return `<div class="tcm-li ${post?'post':''}" onclick="tcmEditMov(${m.id})" title="Ver o editar">
+  return `<div class="tcm-li tcm-li-copy ${post?'post':''}" onclick="tcmEditMov(${m.id})" title="Ver o editar">
     <div class="d">${tcmDayLabel(m.day)}</div>
     <div style="min-width:0"><div class="n">${name}${tags}</div><div class="m">${meta.join(' · ')}</div></div>
-    <div class="a">${m.value<0?'– ':''}${tcmMoney(m.value)}${m.cashback>0?`<small>CB ${tcmMoney(m.cashback)}</small>`:''}</div></div>`;
+    <div class="a">${m.value<0?'– ':''}${tcmMoney(m.value)}${m.cashback>0?`<small>CB ${tcmMoney(m.cashback)}</small>`:''}</div>
+    <button type="button" class="icon-btn mini copy tcm-copy" title="Copiar" aria-label="Copiar este movimiento" onclick="event.stopPropagation(); tcmCopyMov(${m.id})">⧉</button></div>`;
 }
 
 function tcmCardDetail(c, s) {
@@ -4926,11 +4951,11 @@ function tcmOpenCharge(id, accountId) {
   // si el cargo tenía una categoría que no es de Gastos (p. ej. Transferir), se propone Sin Categoría
   const catId = t && tciIsExpenseCat(t.categoryID) && !/sin categor/i.test((ocCatById(t.categoryID)||{}).childCategoryName||'') ? t.categoryID : null;
   const people = tcmPeople();
-  window.__tcmF = { kind:'charge', id, catTouched: !!t, cbTouched: !!(t && t.cashback!=null), stmtTouched: !!(t && t.stmt) };
+  window.__tcmF = { kind:'charge', id, catTouched: !!t, cbTouched: !!(t && t.cashback!=null), stmtTouched: !!(t && t.stmt), time0: time, cardTouched: !!t };
   openModal(`<div class="modal">
     <div class="modal-head"><h3>${id?'Editar cargo':'Registrar cargo'}</h3><button class="modal-close" onclick="closeModal()" aria-label="Cerrar">✕</button></div>
     <div class="modal-body"><div class="form-grid">
-      <div class="field span-2"><label for="tcf-card">Tarjeta</label>${accPickerField('tcf-card', card.accountId, { ids: cards.map(c=>c.accountId), title:'Elegir tarjeta', onchange:"tcmChargeRecalc('card')" })}</div>
+      <div class="field span-2"><label for="tcf-card">Tarjeta</label>${accPickerField('tcf-card', card.accountId, { ids: cards.map(c=>c.accountId), title:'Elegir tarjeta', onchange:"if(!window.__tcmF.__prog) window.__tcmF.cardTouched=true; tcmChargeRecalc('card')" })}</div>
       <div class="dt-pair"><div class="field"><label for="tcf-date">Fecha</label><input id="tcf-date" type="date" value="${day}" onchange="tcmChargeRecalc('date')"></div><div class="field"><label for="tcf-time">Hora</label><input id="tcf-time" type="time" value="${time}"></div></div>
       <div class="field"><label for="tcf-amount">Monto</label><input id="tcf-amount" type="number" inputmode="decimal" step="0.01" min="0" value="${amount}" oninput="tcmChargeRecalc('amount')" placeholder="0.00"></div>
       <div class="field"><label for="tcf-stmt">Estado de cuenta</label><select id="tcf-stmt" onchange="window.__tcmF.stmtTouched=true">${tcmStmtOptions(stmt)}</select></div>
@@ -4943,7 +4968,7 @@ function tcmOpenCharge(id, accountId) {
       ${people.length?`<div class="field span-2"><label>Asignar a personas (distribución)</label><div class="tcm-people" id="tcf-people">${people.map(p=>`<label><input type="checkbox" value="${escapeHtml(p.id)}" ${personas.includes(p.id)?'checked':''}> ${escapeHtml(p.name)}</label>`).join('')}</div></div>`:''}
     </div></div>
     <div class="modal-foot">
-      ${id?`<button class="btn danger" onclick="tcmDeleteMov(${id})">Eliminar</button><button class="btn ghost" onclick="tcmSaveCharge(true)">Guardar como nuevo</button>`:''}
+      ${id?`<button class="btn danger" onclick="tcmDeleteMov(${id})">Eliminar</button><button class="btn ghost" onclick="tcmCopyMov(${id})">Copiar</button>`:''}
       <button class="btn ghost" onclick="closeModal()">Cancelar</button>
       <button class="btn primary" onclick="tcmSaveCharge(false)">${id?'Guardar cambios':'Registrar cargo'}</button>
     </div></div>`);
@@ -4969,6 +4994,13 @@ function tcmChargeRecalc(what) {
   const rate = Number(card.cbRate)||0;
   hint.textContent = rate>0 && (card.loyalty==='cashback'||card.loyalty==='dolares_faciles') ? `${TCM_LOYALTY[card.loyalty]} ${rate}%: se calcula solo.` : '';
   if (!F.cbTouched && (what!=='name')) document.getElementById('tcf-cb').value = amount>0 && rate>0 ? tcmCalcCB(card, amount) : '';
+  if (what==='name' && !F.id) {
+    const nm = document.getElementById('tcf-name').value.trim();
+    if (nm && F.prefilledFor !== nm.toLowerCase() && getItemNamesRanked().some(n=>n.toLowerCase()===nm.toLowerCase())) {
+      const row = tcmLastChargeByName(nm);
+      if (row) { F.prefilledFor = nm.toLowerCase(); tcmFillChargeFrom(row, false); return; }
+    }
+  }
   if (what==='name' && !F.catTouched) {
     const key = tciMerchantKey(document.getElementById('tcf-name').value);
     const rules = tciGetConfig('merchantRules', {});
@@ -4993,7 +5025,7 @@ function tcmSaveCharge(asNew) {
   const cashback = cbRaw==='' ? 0 : Number(cbRaw)||0;
   const tcCode = document.getElementById('tcf-zero').value || null;
   const personas = Array.from(document.querySelectorAll('#tcf-people input:checked')).map(i=>i.value);
-  const dateStr = `${day} ${document.getElementById('tcf-time').value||'12:00'}:00.000`;
+  const dateStr = `${day} ${ocSaveTime('tcf-time','tcf-date', !F.id || asNew, F.time0)}:00.000`;
   const notes = document.getElementById('tcf-notes').value.trim();
   const itemId = getOrCreateItemId(name);
   const wasRefund = F.id && (dbOne(`SELECT amount FROM TRANSACTIONSTABLE WHERE transactionsTableID=?`, [F.id])||{}).amount > 0;
@@ -5034,7 +5066,7 @@ function tcmOpenPayment(id, accountId) {
   const from = t ? t.accountPairID : (lastFrom[card.accountId] || (sources[0]||{}).accountsTableID);
   const day = t ? t.date.slice(0,10) : tcmToday();
   const stmt = (t && t.stmt) || tcmPaymentStmt(day, card.cutDay);
-  window.__tcmF = { kind:'payment', id, stmtTouched: !!(t && t.stmt), grp: t ? t.transferGroupID : 0, legs: id ? getTransferLegs(id) : [] };
+  window.__tcmF = { kind:'payment', id, stmtTouched: !!(t && t.stmt), grp: t ? t.transferGroupID : 0, legs: id ? getTransferLegs(id) : [], time0: t ? t.date.slice(11,16) : tcmNowTime() };
   openModal(`<div class="modal">
     <div class="modal-head"><h3>${id?'Editar abono':'Registrar abono'}</h3><button class="modal-close" onclick="closeModal()" aria-label="Cerrar">✕</button></div>
     <div class="modal-body">
@@ -5049,7 +5081,7 @@ function tcmOpenPayment(id, accountId) {
       <div class="field span-2"><label for="tcp-notes">Referencia (opcional)</label><textarea id="tcp-notes" rows="2" oninput="autoGrow(this)" placeholder="Ej. Transfer 365">${escapeHtml(t?t.notes||'':'')}</textarea></div>
     </div></div>
     <div class="modal-foot">
-      ${id?`<button class="btn danger" onclick="tcmDeleteMov(${id})">Eliminar</button>`:''}
+      ${id?`<button class="btn danger" onclick="tcmDeleteMov(${id})">Eliminar</button><button class="btn ghost" onclick="tcmCopyMov(${id})">Copiar</button>`:''}
       <button class="btn ghost" onclick="closeModal()">Cancelar</button>
       <button class="btn primary" onclick="tcmSavePayment()">${id?'Guardar cambios':'Registrar abono'}</button>
     </div></div>`);
@@ -5080,7 +5112,7 @@ function tcmSavePayment() {
   if (!from) { showToast('Elige la cuenta desde la que pagaste.', 'error'); return; }
   const stmt = document.getElementById('tcp-stmt').value;
   const notes = document.getElementById('tcp-notes').value.trim();
-  const dateStr = `${day} ${document.getElementById('tcp-time').value||'12:00'}:00.000`;
+  const dateStr = `${day} ${ocSaveTime('tcp-time','tcp-date', !F.id, F.time0)}:00.000`;
   const scaled = Math.round(amount*SCALE);
   const itemId = getOrCreateItemId('Pago de tarjeta');
   let cardLeg;
@@ -5616,7 +5648,7 @@ function tcmOpenCredit(id, accountId, pre) {
   const day = t ? t.date.slice(0,10) : (pre.day || tcmToday());
   const stmt = (t && t.stmt) || tcmChargeStmt(day, card.cutDay);
   const catId = t ? t.categoryID : tcmDefaultCreditCategory();
-  window.__tcmF = { kind:'credit', id, stmtTouched: !!(t && t.stmt) };
+  window.__tcmF = { kind:'credit', id, stmtTouched: !!(t && t.stmt), time0: t ? t.date.slice(11,16) : tcmNowTime() };
   openModal(`<div class="modal">
     <div class="modal-head"><h3>${id?'Editar crédito':'Crédito o descuento'}</h3><button class="modal-close" onclick="closeModal()" aria-label="Cerrar">✕</button></div>
     <div class="modal-body">
@@ -5631,7 +5663,7 @@ function tcmOpenCredit(id, accountId, pre) {
       <div class="field span-2"><label for="tcc-notes">Detalle (opcional)</label><textarea id="tcc-notes" rows="2" oninput="autoGrow(this)" placeholder="Ej. 20% en compras de súper del 20/09">${escapeHtml(t?t.notes||'':'')}</textarea></div>
     </div></div>
     <div class="modal-foot">
-      ${id?`<button class="btn danger" onclick="tcmDeleteMov(${id})">Eliminar</button>`:''}
+      ${id?`<button class="btn danger" onclick="tcmDeleteMov(${id})">Eliminar</button><button class="btn ghost" onclick="tcmCopyMov(${id})">Copiar</button>`:''}
       <button class="btn ghost" onclick="closeModal()">Cancelar</button>
       <button class="btn primary" onclick="tcmSaveCredit()">${id?'Guardar cambios':'Registrar crédito'}</button>
     </div></div>`);
@@ -5654,7 +5686,7 @@ function tcmSaveCredit() {
   if (!day) { showToast('Elige la fecha del crédito.', 'error'); return; }
   if (catRaw === '') { showToast('Elige la categoría de ingreso.', 'error'); return; }
   const stmt = document.getElementById('tcc-stmt').value;
-  const dateStr = `${day} ${document.getElementById('tcc-time').value||'12:00'}:00.000`;
+  const dateStr = `${day} ${ocSaveTime('tcc-time','tcc-date', !F.id, F.time0)}:00.000`;
   const notes = document.getElementById('tcc-notes').value.trim();
   const itemId = getOrCreateItemId(document.getElementById('tcc-name').value.trim() || 'Crédito de tarjeta');
   const scaled = Math.round(amount*SCALE);
@@ -5683,7 +5715,7 @@ function tcmSaveCredit() {
    El mismo JSON sirve para descargarlo como respaldo y para guardarlo en
    un repositorio PRIVADO de GitHub mediante su API de contenidos.
    ===================================================================== */
-const OC_APP_VERSION = '7.4';
+const OC_APP_VERSION = '7.5';
 const BKP_FORMAT = 'owncoin-backup';
 
 /* ---------- JSON <-> base de datos ---------- */
@@ -6350,7 +6382,8 @@ function openCatPicker(id) {
       ${o.empty ? `<button type="button" class="catpick-item catpick-empty ${!cur?'selected':''}" onclick="pickCat('${id}', '')"><span class="catpick-ic" aria-hidden="true">–</span><span class="catpick-code"></span><span class="catpick-name">${escapeHtml(o.empty)}</span></button>` : ''}
       ${groupsHtml.join('') || '<p class="hint" style="padding:16px;">No hay categorías de este tipo.</p>'}
       <p class="hint catpick-none" style="padding:16px;display:none;">Ninguna categoría coincide.</p>
-    </div></div>`;
+    </div>
+    ${o.kind==='exp' || o.kind==='inc' ? `<div class="catpick-foot"><button type="button" class="btn ghost small" onclick="catPickNewForm('${id}')">+ Nueva categoría</button></div>` : ''}</div>`;
   const q = document.getElementById('catpick-q');
   if (window.matchMedia('(hover: hover)').matches) setTimeout(()=>q.focus(), 30);
   const s = root.querySelector('.catpick-item.selected'); if (s) s.scrollIntoView({ block:'center' });
@@ -7365,6 +7398,230 @@ function renderCreditCardWidget() {
       </div>`;
     }).join('') : `<p class="faint">No hay tarjetas registradas.</p>`}
   `));
+}
+
+/* =====================================================================
+   CREAR CATEGORÍA SIN SALIR DE LA TRANSACCIÓN (v7.5)
+   El selector de categorías tiene "+ Nueva categoría": se crea ahí mismo
+   (en un grupo existente o en uno nuevo) y queda elegida.
+   ===================================================================== */
+function catPickNewForm(id) {
+  const o = window.__catPick[id] || {};
+  const G = tciGroupIds();
+  const kind = o.kind === 'inc' ? 'inc' : 'exp';
+  const gid = kind === 'inc' ? G.inc : G.exp;
+  const parents = dbAll(`SELECT * FROM PARENTCATEGORYTABLE WHERE categoryGroupID=? ORDER BY parentCategoryName`, [gid]);
+  window.__catNew = { id, kind, parent: parents[0] ? parents[0].parentCategoryTableID : 'new', codeTouched:false };
+  const root = document.getElementById('catpick-root');
+  const sheet = root.querySelector('.catpick-sheet');
+  const q = (document.getElementById('catpick-q')||{}).value || '';
+  sheet.innerHTML = `
+    <div class="catpick-top"><h3>Nueva categoría de ${kind==='inc'?'ingresos':'gastos'}</h3><button type="button" class="modal-close" onclick="closeCatPicker()" aria-label="Cerrar">✕</button></div>
+    <div class="cbc-body">
+      <div class="field"><label>Grupo</label>
+        <div class="cn-groups" role="radiogroup" aria-label="Grupo">
+          ${parents.map(p=>`<button type="button" role="radio" class="cn-group" data-p="${p.parentCategoryTableID}" onclick="catNewSetParent('${p.parentCategoryTableID}')">${escapeHtml(p.parentCategoryName)}</button>`).join('')}
+          <button type="button" role="radio" class="cn-group cn-newgroup" data-p="new" onclick="catNewSetParent('new')">+ Grupo nuevo</button>
+        </div></div>
+      <div id="cn-newgroup" class="form-grid" style="display:none;margin-top:4px;">
+        <div class="field"><label for="cn-gcode">Código del grupo</label><input id="cn-gcode" inputmode="numeric" maxlength="4" value="${ocNextParentCode(gid)}"></div>
+        <div class="field"><label for="cn-gname">Nombre del grupo</label><input id="cn-gname" placeholder="Ej. Mascotas"></div>
+      </div>
+      <div class="form-grid" style="margin-top:4px;">
+        <div class="field"><label for="cn-code">Código</label><input id="cn-code" inputmode="numeric" maxlength="8" oninput="window.__catNew.codeTouched=true"></div>
+        <div class="field"><label for="cn-name">Nombre</label><input id="cn-name" value="${escapeHtml(q.trim())}" placeholder="Ej. Veterinario"></div>
+      </div>
+      <p class="hint">Después puedes cambiarle el ícono o el presupuesto en Categorías.</p>
+    </div>
+    <div class="modal-foot"><button class="btn ghost" onclick="openCatPicker('${id}')">Volver a la lista</button><button class="btn primary" onclick="catNewSave()">Crear y usar</button></div>`;
+  catNewSetParent(window.__catNew.parent);
+  setTimeout(()=>{ const n = document.getElementById('cn-name'); if (n) n.focus(); }, 40);
+}
+function catNewSetParent(p) {
+  const S = window.__catNew; S.parent = p;
+  document.querySelectorAll('.cn-group').forEach(b=>{ const on = b.dataset.p === String(p); b.classList.toggle('active', on); b.setAttribute('aria-checked', on); });
+  const isNew = p === 'new';
+  document.getElementById('cn-newgroup').style.display = isNew ? '' : 'none';
+  if (!S.codeTouched) {
+    let code = '';
+    if (isNew) { const g = (document.getElementById('cn-gcode')||{}).value || ''; code = /^\d{4}$/.test(g) ? g + '01' : ''; }
+    else code = ocNextChildCode(p);
+    document.getElementById('cn-code').value = code;
+  }
+  if (isNew) document.getElementById('cn-gcode').oninput = ()=>catNewSetParent('new');
+}
+function catNewSave() {
+  const S = window.__catNew, G = tciGroupIds();
+  const name = document.getElementById('cn-name').value.trim();
+  const code = document.getElementById('cn-code').value.trim();
+  if (!name) { showToast('Escribe el nombre de la categoría.', 'error'); return; }
+  if (code && !/^\d+$/.test(code)) { showToast('El código solo lleva números.', 'error'); return; }
+  let parentId = S.parent;
+  App.db.run('BEGIN');
+  try {
+    if (parentId === 'new') {
+      const gcode = document.getElementById('cn-gcode').value.trim(), gname = document.getElementById('cn-gname').value.trim();
+      if (!gname) throw new Error('Escribe el nombre del grupo nuevo.');
+      if (gcode && !/^\d{4}$/.test(gcode)) throw new Error('El código del grupo debe tener 4 dígitos.');
+      App.db.run(`INSERT INTO PARENTCATEGORYTABLE (parentCategoryName, budgetAmountCategoryParent, budgetEnabledCategoryParent, categoryGroupID, budgetPeriodCategoryParent) VALUES (?,0,0,?,0)`,
+        [gcode ? `${gcode} - ${gname}` : gname, S.kind==='inc' ? G.inc : G.exp]);
+      parentId = lastInsertId();
+    }
+    const full = code ? `${code} - ${name}` : name;
+    if (dbOne(`SELECT 1 x FROM CHILDCATEGORYTABLE WHERE parentCategoryID=? AND TRIM(childCategoryName)=? COLLATE NOCASE`, [Number(parentId), full])) throw new Error('Ya existe esa categoría en el grupo.');
+    App.db.run(`INSERT INTO CHILDCATEGORYTABLE (childCategoryName, budgetAmount, budgetEnabledCategoryChild, budgetPeriod, parentCategoryID, childCategoryIcon) VALUES (?,0,0,0,?,?)`,
+      [full, Number(parentId), 'AutoMirrored.Outlined.List']);
+    const newId = lastInsertId();
+    App.db.run('COMMIT');
+    scheduleAutosave();
+    showToast(`Categoría “${full}” creada.`, 'success');
+    pickCat(S.id, String(newId));
+  } catch (err) {
+    try { App.db.run('ROLLBACK'); } catch(e) {}
+    showToast(err.message, 'error');
+  }
+}
+
+/* =====================================================================
+   RECARGAS ACCIDENTALES (v7.5)
+   - Se desactiva el "deslizar hacia abajo para recargar" del navegador.
+   - Si la página igual se va a cerrar o recargar: se guarda al instante lo
+     pendiente y, si hay un formulario con datos, el navegador pregunta antes.
+   - Si la recarga fue accidental y la app estaba desbloqueada hace poco, no
+     vuelve a pedir PIN o huella (en la misma pestaña, durante 10 minutos).
+   ===================================================================== */
+const OC_UNLOCK_KEY = 'oc_unlocked_at', OC_UNLOCK_GRACE = 10*60*1000;
+function ocTouchUnlock() { try { if (App.securityUnlocked) sessionStorage.setItem(OC_UNLOCK_KEY, String(Date.now())); } catch(e) {} }
+function ocClearUnlock() { try { sessionStorage.removeItem(OC_UNLOCK_KEY); } catch(e) {} }
+function ocRecentlyUnlocked() {
+  try { const t = Number(sessionStorage.getItem(OC_UNLOCK_KEY)); return t && Date.now() - t < OC_UNLOCK_GRACE; } catch(e) { return false; }
+}
+let __ocTouchT = 0;
+['pointerdown','keydown'].forEach(ev=>document.addEventListener(ev, ()=>{ if (Date.now() - __ocTouchT > 20000) { __ocTouchT = Date.now(); ocTouchUnlock(); } }, { passive:true, capture:true }));
+function ocFlushNow() {
+  if (!App.db || !App.__savePending) return;
+  clearTimeout(__autosaveTimer);
+  persistCurrentDatabase();
+}
+window.addEventListener('pagehide', ocFlushNow);
+document.addEventListener('visibilitychange', ()=>{ if (document.visibilityState === 'hidden') { ocFlushNow(); ocTouchUnlock(); } });
+window.addEventListener('beforeunload', (e)=>{
+  const mr = document.getElementById('modal-root');
+  const formAtRisk = mr && mr.classList.contains('open') && mr.__dirty;
+  const pending = !!App.__savePending;
+  ocFlushNow();
+  if (App.securityUnlocked) ocTouchUnlock();
+  if (formAtRisk || pending) { e.preventDefault(); e.returnValue = ''; return ''; }
+});
+function ocWasReloaded() {
+  try { const n = performance.getEntriesByType('navigation')[0]; return n && n.type === 'reload'; } catch(e) { return false; }
+}
+
+/* =====================================================================
+   COPIAR Y AUTOCOMPLETAR (v7.5)
+   ===================================================================== */
+function ocNowHM() { const d = new Date(); return `${ocPad2(d.getHours())}:${ocPad2(d.getMinutes())}`; }
+/* Hora al guardar: si es un registro nuevo de hoy y nadie tocó la hora, se usa la del momento exacto de guardar */
+function ocSaveTime(timeId, dateId, isNew, initial) {
+  const t = (document.getElementById(timeId)||{}).value || '';
+  const d = (document.getElementById(dateId)||{}).value || '';
+  if (isNew && (!t || t === initial) && d === ocLocalDay()) return ocNowHM();
+  return t || ocNowHM();
+}
+function ocTxnTime() { const c = window.__txnCtx || {}; return ocSaveTime('f-txn-time', 'f-txn-date', !c.t, c.dt && c.dt.time); }
+
+/* Última transacción con ese nombre (para una transferencia, la salida) */
+function ocLastTxnByName(name) {
+  return dbOne(`SELECT tr.* FROM TRANSACTIONSTABLE tr JOIN ITEMTABLE i ON i.itemTableID = tr.itemID
+    WHERE tr.deletedTransaction=6 AND tr.transactionTypeID IN (3,4,5) AND i.itemName = ? COLLATE NOCASE
+      AND NOT (tr.transactionTypeID=5 AND tr.amount > 0)
+    ORDER BY tr.date DESC, tr.transactionsTableID DESC LIMIT 1`, [name]);
+}
+function ocPrefillTxnFromName(name) {
+  const ctx = window.__txnCtx; if (!ctx || ctx.t) return;
+  const last = ocLastTxnByName(name); if (!last) return;
+  const keep = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+  const typedDate = keep('f-txn-date'), typedTime = keep('f-txn-time'), typedNotes = keep('f-txn-notes').trim();
+  const typedAmount = keep('f-txn-amount') || ((ctx.splits||[]).length===1 ? ctx.splits[0].amount : '');
+  const type = last.transactionTypeID===5 ? 'transferencia' : last.transactionTypeID===4 ? 'ingreso' : 'gasto';
+  const acc = dbOne(`SELECT accountCurrency FROM ACCOUNTSTABLE WHERE accountsTableID=?`, [last.accountID]);
+  ctx.src = Object.assign({}, last, { itemName:name, transactionCurrency:(acc && acc.accountCurrency) || 'USD', notes: typedNotes || last.notes || '' });
+  ctx.type = type;
+  ctx.transfer = type==='transferencia' ? { from:last.accountID, to:last.accountPairID } : null;
+  ctx.splits = last.newSplitTransactionID ? getSplitSiblings(last.newSplitTransactionID)
+    : [{ categoryId:last.categoryID, amount: Math.abs(last.amount/SCALE).toFixed(2) }];
+  if (typedAmount && ctx.splits.length===1) ctx.splits[0].amount = typedAmount;
+  if (typedAmount && type==='transferencia') ctx.src.amount = -Math.round(parseFloat(typedAmount)*SCALE);
+  document.querySelectorAll('#txn-type-toggle button').forEach(b=>b.classList.toggle('active', b.dataset.t===type));
+  renderTxnFormBody();
+  const set = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
+  set('f-txn-date', typedDate); set('f-txn-time', typedTime); set('f-txn-name', name);
+  if (typeof autoGrowAll === 'function') autoGrowAll();
+  const mr = document.getElementById('modal-root'); if (mr) mr.__dirty = true;
+  const when = last.date ? `${last.date.slice(8,10)}/${last.date.slice(5,7)}/${last.date.slice(0,4)}` : '';
+  ocFormHint('f-txn-name', `Se cargaron los datos de la última vez (${when}). Revísalos antes de guardar.`);
+}
+function ocFormHint(inputId, text) {
+  const el = document.getElementById(inputId); if (!el) return;
+  const field = el.closest('.field'); if (!field) return;
+  let h = field.querySelector('.oc-prefill-hint');
+  if (!h) { h = document.createElement('span'); h.className = 'hint oc-prefill-hint'; field.appendChild(h); }
+  h.textContent = '↺ ' + text;
+}
+
+/* ---------- Tarjetas: copiar movimientos y autocompletar cargos ---------- */
+function tcmLastChargeByName(name) {
+  return dbOne(`SELECT tr.*, i.itemName, m.tcCode, m.personas, m.cashback FROM TRANSACTIONSTABLE tr
+    JOIN OC_TC_CARD k ON k.accountId = tr.accountID
+    JOIN ITEMTABLE i ON i.itemTableID = tr.itemID
+    LEFT JOIN OC_TC_TXN m ON m.txnId = tr.transactionsTableID
+    WHERE tr.deletedTransaction=6 AND tr.transactionTypeID=3 AND i.itemName = ? COLLATE NOCASE
+    ORDER BY tr.date DESC, tr.transactionsTableID DESC LIMIT 1`, [name]);
+}
+/* all=true: copia completa (monto incluido). all=false: solo llena lo que esté vacío */
+function tcmFillChargeFrom(row, all) {
+  const F = window.__tcmF; if (!F || F.id) return;
+  const v = id => (document.getElementById(id)||{}).value || '';
+  if (all || !F.cardTouched) { F.__prog = true; accPickSet('tcf-card', row.accountID, true); F.__prog = false; }
+  if (all || !v('tcf-amount')) { document.getElementById('tcf-amount').value = Math.abs(row.amount/SCALE).toFixed(2); }
+  if ((all || !v('tcf-cat')) && tciIsExpenseCat(row.categoryID)) catPickSet('tcf-cat', row.categoryID);
+  if (all || !v('tcf-name')) document.getElementById('tcf-name').value = row.itemName || '';
+  if ((all || !v('tcf-notes').trim()) && row.notes) { document.getElementById('tcf-notes').value = row.notes; autoGrowAll(); }
+  if (row.tcCode) { const z = document.getElementById('tcf-zero'); if (z && Array.from(z.options).some(o=>o.value===row.tcCode)) z.value = row.tcCode; }
+  let personas = []; try { personas = row.personas ? JSON.parse(row.personas) : []; } catch(e) {}
+  document.querySelectorAll('#tcf-people input').forEach(i=>{ i.checked = personas.includes(i.value); });
+  F.cbTouched = false; tcmChargeRecalc('amount');
+  const mr = document.getElementById('modal-root'); if (mr) mr.__dirty = true;
+  const when = `${row.date.slice(8,10)}/${row.date.slice(5,7)}/${row.date.slice(0,4)}`;
+  ocFormHint('tcf-name', all ? `Copia del cargo del ${when}. La fecha y la hora son las de ahora.` : `Se cargaron los datos de tu último cargo en este comercio (${when}).`);
+}
+function tcmCopyMov(id) {
+  const m = dbOne(`SELECT tr.*, i.itemName, k.kind FROM TRANSACTIONSTABLE tr LEFT JOIN ITEMTABLE i ON i.itemTableID=tr.itemID
+    LEFT JOIN OC_TC_TXN k ON k.txnId=tr.transactionsTableID WHERE tr.transactionsTableID=?`, [id]);
+  if (!m) return;
+  closeModal();
+  if (m.transactionTypeID === 3) {
+    const row = dbOne(`SELECT tr.*, i.itemName, x.tcCode, x.personas FROM TRANSACTIONSTABLE tr LEFT JOIN ITEMTABLE i ON i.itemTableID=tr.itemID LEFT JOIN OC_TC_TXN x ON x.txnId=tr.transactionsTableID WHERE tr.transactionsTableID=?`, [id]);
+    tcmOpenCharge(null, m.accountID);
+    tcmFillChargeFrom(row, true);
+    document.querySelector('#modal-root .modal-head h3').textContent = 'Copiar cargo';
+  } else if (m.transactionTypeID === 5 && m.amount > 0) {
+    tcmOpenPayment(null, m.accountID);
+    accPickSet('tcp-from', m.accountPairID);
+    document.getElementById('tcp-amount').value = Math.abs(m.amount/SCALE).toFixed(2);
+    document.getElementById('tcp-notes').value = m.notes || '';
+    document.querySelector('#modal-root .modal-head h3').textContent = 'Copiar abono';
+    document.getElementById('modal-root').__dirty = true;
+  } else if (m.transactionTypeID === 4 && m.amount > 0) {
+    tcmOpenCredit(null, m.accountID, { amount: Math.abs(m.amount/SCALE).toFixed(2) });
+    document.getElementById('tcc-name').value = m.itemName || '';
+    catPickSet('tcc-cat', m.categoryID);
+    document.getElementById('tcc-notes').value = m.notes || '';
+    document.querySelector('#modal-root .modal-head h3').textContent = 'Copiar crédito';
+    document.getElementById('modal-root').__dirty = true;
+  } else {
+    duplicateTransaction(id);
+  }
 }
 
 main();
