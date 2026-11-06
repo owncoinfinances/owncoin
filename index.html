@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>🪙 OWNCOIN v7.5 — Gestor Financiero Personal</title>
+<title>🪙 OWNCOIN v7.6 — Gestor Financiero Personal</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1099,6 +1099,10 @@ html[data-theme="dark"] .cn-newgroup{ color:var(--gold-300); }
 .tcm-li.tcm-li-copy{ grid-template-columns:78px minmax(0,1fr) auto 30px; }
 .tcm-copy{ width:28px; height:28px; padding:0; justify-content:center; }
 @media(max-width:560px){ .tcm-li.tcm-li-copy{ grid-template-columns:minmax(0,1fr) auto 30px; } }
+
+/* ---------- v7.6 ---------- */
+.split-tag{ display:inline-block; font-size:10px; font-weight:800; letter-spacing:.4px; text-transform:uppercase; padding:1px 6px; border-radius:5px; background:var(--gold-100); color:var(--gold-600); border:1px solid var(--gold-300); margin-right:6px; vertical-align:1px; }
+.split-cats{ font-size:11.5px; color:var(--ink-soft); margin-top:2px; }
 </style>
 </head>
 <script>
@@ -1122,7 +1126,7 @@ html[data-theme="dark"] .cn-newgroup{ color:var(--gold-300); }
 <!-- ===================== LANDING (choose DB source) ===================== -->
 <div id="landing">
   <div class="landing-card">
-    <div class="landing-mark">🪙 OWNCOIN <span style="color:var(--gold-600);">v7.5</span><span class="digits">Gestor financiero personal</span></div>
+    <div class="landing-mark">🪙 OWNCOIN <span style="color:var(--gold-600);">v7.6</span><span class="digits">Gestor financiero personal</span></div>
     <p class="landing-sub">Tus cuentas, tarjetas y presupuestos en un solo lugar, con respaldos en JSON y sincronización con tu GitHub privado.</p>
     <div class="landing-options">
       <div class="landing-opt" id="opt-new">
@@ -1151,7 +1155,7 @@ html[data-theme="dark"] .cn-newgroup{ color:var(--gold-300); }
   <div class="app-brand">
     <div class="mark">🪙</div>
     <div style="min-width:0;">
-      <div class="name">OWNCOIN <small>v7.5</small></div>
+      <div class="name">OWNCOIN <small>v7.6</small></div>
       <div class="tag" id="brand-filename">sin archivo</div>
       <div class="tag" id="autosave-indicator" style="color:#a9d6bb;">—</div>
     </div>
@@ -2008,7 +2012,7 @@ function saveSplitTransaction(form) {
   const sign = form.type === 'gasto' ? -1 : 1;
   const typeId = form.type === 'gasto' ? TXN_TYPE.GASTO : TXN_TYPE.INGRESO;
   const dateStr = dateToDbStr(form.date, form.time);
-  const splitGroupId = Date.now();
+  const splitGroupId = form.splits.length > 1 ? Date.now() : 0;
   const itemId = getOrCreateItemId(form.itemName);
   form.splits.forEach(s=>{
     const amt = sign * Math.abs(toScaled(s.amount));
@@ -2543,7 +2547,7 @@ function renderRecentMovementsWidget() {
   const runningMap = computeRunningBalanceMap();
   const el = document.getElementById('dash-recent');
   el.innerHTML = recientes.length
-    ? recientes.map(t=>renderTxnRow2(t, runningMap[t.transactionsTableID])).join('')
+    ? ocCollapseSplits(recientes).map(t=>renderTxnRow2(t, runningMap[t.__runId || t.transactionsTableID])).join('')
     : `<div class="empty-state"><div class="glyph">—</div><p>Aún no hay movimientos registrados.</p></div>`;
 }
 
@@ -2879,7 +2883,7 @@ function renderTxnDayGroup(group, runningMap) {
         <span class="dh-left"><span class="dh-date">${fmtDayHeader(group.day)}</span><button class="day-add" title="Nueva transacción en esta fecha" aria-label="Nueva transacción el ${fmtDayHeader(group.day)}" onclick="event.stopPropagation(); openTxnModal(null, null, { date:'${group.day}' })">+</button></span>
         <span class="amount ${moneyClass(dayTotal)}" style="font-size:12.5px;">${fmtMoney(Math.abs(dayTotal), '')}</span>
       </div>
-      ${group.txns.map(t=>renderTxnRow2(t, runningMap[t.transactionsTableID])).join('')}
+      ${ocCollapseSplits(group.txns).map(t=>renderTxnRow2(t, runningMap[t.__runId || t.transactionsTableID])).join('')}
     </div>`;
 }
 function renderTxnRow2(t, runningBal) {
@@ -2890,6 +2894,8 @@ function renderTxnRow2(t, runningBal) {
     iconClass = t.transactionTypeID === 4 ? 'ingreso' : 'gasto';
     iconInner = `<span class="msi">${getCategoryIconLigature({childCategoryIcon:t.childCategoryIcon})}</span>`;
   }
+  if (t.__parts && t.__parts.length > 1) catLabel = `<span class="split-tag">Split</span>${t.__parts.length} categorías<div class="split-cats">${ocSplitCatsLine(t.__parts)}</div>`;
+  else if (t.__splitPartOnly) catLabel = `${escapeHtml(catLabel)} <span class="split-tag" title="Esta fila es una parte de un split">Parte de split</span>`;
   if (t.transactionTypeID === 5) { iconInner = '⇄'; iconClass = 'transferencia'; catLabel = `(Transferir) → ${escapeHtml(shortAccName(t.pairAccountName))}`; }
   else if (t.transactionTypeID === 2) { iconInner = '★'; iconClass = 'nueva'; catLabel = 'Saldo inicial'; }
   const balHtml = runningBal !== undefined
@@ -2982,11 +2988,12 @@ function openTxnModal(id=null, copySource=null, preset=null) {
   // Al copiar, la fecha/hora arranca en "ahora" (no la de la transacción original)
   const dt = t ? dbStrToDateInput(t.date) : dbStrToDateInput(null);
   if (!t && preset && preset.date) dt.date = preset.date;
-  const isSplit = t && t.newSplitTransactionID;
+  const isSplit = t && t.newSplitTransactionID && ocSplitTotalParts(t.newSplitTransactionID) > 1;
 
   let initialSplits = [{categoryId:'', amount:''}];
   if (isSplit) initialSplits = getSplitSiblings(t.newSplitTransactionID);
-  else if (copySource && copySource.newSplitTransactionID) initialSplits = getSplitSiblings(copySource.newSplitTransactionID);
+  else if (t && (t.transactionTypeID === 3 || t.transactionTypeID === 4)) initialSplits = [{ id:t.transactionsTableID, categoryId:t.categoryID, amount: Math.abs(t.amount/SCALE).toFixed(2) }];
+  else if (copySource && copySource.newSplitTransactionID) initialSplits = getSplitSiblings(copySource.newSplitTransactionID).map(s=>({ categoryId:s.categoryId, amount:s.amount }));
   else if (copySource) initialSplits = [{ categoryId: copySource.categoryID, amount: Math.abs(copySource.amount/SCALE).toFixed(2) }];
 
   const headerTitle = id ? 'Editar transacción' : (copySource ? 'Copiar transacción' : 'Nueva transacción');
@@ -2994,12 +3001,12 @@ function openTxnModal(id=null, copySource=null, preset=null) {
     <div class="modal wide">
       <div class="modal-head"><h3>${headerTitle}</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
       <div class="modal-body">
-        ${isSplit ? `<p class="hint" style="margin-bottom:12px;">Esta transacción es parte de un split. Elimínala y créala de nuevo si necesitas cambiar sus partes.</p>` : ''}
+        ${isSplit ? `<p class="hint" style="margin-bottom:12px;">Transacción dividida en ${initialSplits.length} categorías. Puedes cambiar, agregar o quitar líneas; el total es la suma de todas.</p>` : ''}
         ${copySource ? `<p class="hint" style="margin-bottom:12px;">📋 Copiando "${copySource.itemName||'esta transacción'}" — revisa la fecha y los datos antes de guardar.</p>` : ''}
         <div class="type-toggle" id="txn-type-toggle" style="margin-bottom:16px;">
           <button data-t="gasto" class="${initialType==='gasto'?'active':''}" onclick="setTxnType('gasto')">Gasto</button>
           <button data-t="ingreso" class="${initialType==='ingreso'?'active':''}" onclick="setTxnType('ingreso')">Ingreso</button>
-          <button data-t="transferencia" class="${initialType==='transferencia'?'active':''}" ${id&&!isSplit&&initialType!=='transferencia'?'':''} onclick="setTxnType('transferencia')">Transferencia</button>
+          <button data-t="transferencia" class="${initialType==='transferencia'?'active':''}" ${isSplit?'disabled title="Un split no puede convertirse en transferencia"':''} onclick="setTxnType('transferencia')">Transferencia</button>
         </div>
         <div id="txn-form-body"></div>
       </div>
@@ -3015,7 +3022,10 @@ function openTxnModal(id=null, copySource=null, preset=null) {
   if (src && src.transactionTypeID === TXN_TYPE.TRANSFERENCIA) {
     transfer = src.amount < 0 ? { from: src.accountID, to: src.accountPairID } : { from: src.accountPairID, to: src.accountID };
   }
-  window.__txnCtx = { t, src, accounts, categories, dt, type: initialType, splits: initialSplits, preset: preset||{}, transfer, returnTo };
+  window.__txnCtx = { t, src, accounts, categories, dt, type: initialType, splits: initialSplits, preset: preset||{}, transfer, returnTo,
+    splitEdit: !!(t && (t.transactionTypeID === 3 || t.transactionTypeID === 4)),
+    splitGroup: isSplit ? t.newSplitTransactionID : 0, splitIds: t ? initialSplits.map(s=>s.id).filter(Boolean) : [],
+    keepSign: !!(t && ((t.transactionTypeID === 3 && t.amount > 0) || (t.transactionTypeID === 4 && t.amount < 0))) };
   renderTxnFormBody();
   autoGrowAll();
 }
@@ -3053,8 +3063,8 @@ function duplicateTransaction(id) {
   openTxnModal(null, src);
 }
 function getSplitSiblings(splitId) {
-  return dbAll(`SELECT categoryID, amount FROM TRANSACTIONSTABLE WHERE newSplitTransactionID=?`, [splitId])
-    .map(r=>({ categoryId:r.categoryID, amount: Math.abs(r.amount/SCALE).toFixed(2) }));
+  return dbAll(`SELECT transactionsTableID id, categoryID, amount FROM TRANSACTIONSTABLE WHERE newSplitTransactionID=? AND deletedTransaction=6 ORDER BY transactionsTableID`, [splitId])
+    .map(r=>({ id:r.id, categoryId:r.categoryID, amount: Math.abs(r.amount/SCALE).toFixed(2) }));
 }
 /* ---------------------------------------------------------------------
    Autocompletado del nombre de transacción (propio, no <datalist> —
@@ -3144,7 +3154,7 @@ function renderTxnFormBody() {
     return;
   }
 
-  const canSplit = !t; // splits solo al crear (nueva o copia), para no corromper ediciones existentes
+  const canSplit = !t || !!ctx.splitEdit; // al crear, o al editar un gasto/ingreso (con una o varias líneas)
   body.innerHTML = `
     <div class="form-grid">
       <div class="field span-2 autocomplete-wrap"><label>Nombre *</label><input id="f-txn-name" placeholder="Ej. Almuerzo, Supermercado, Sueldo…" value="${src?(src.itemName||''):''}" autocomplete="off" oninput="handleTxnNameInput(this)" onfocus="handleTxnNameFocus(this)" onblur="handleTxnNameBlur()" onkeydown="handleTxnNameKeydown(event)"><div class="autocomplete-list" id="txn-name-suggestions"></div></div>
@@ -3210,11 +3220,11 @@ function submitTxnForm() {
         currency: 'USD',
         itemName
       });
-    } else if (!ctx.t && document.getElementById('split-rows')) {
-      if (!itemName) throw new Error('Asigna un nombre a la transacción.');
+    } else if ((!ctx.t || ctx.splitEdit) && document.getElementById('split-rows')) {
+      if (!itemName && !ctx.t) throw new Error('Asigna un nombre a la transacción.');
       const valid = ctx.splits.filter(s=>s.categoryId!=='' && s.categoryId!=null && parseFloat(s.amount)>0);
       if (!valid.length) throw new Error('Agrega al menos una línea de split con categoría y monto.');
-      saveSplitTransaction({
+      (ctx.splitEdit ? saveSplitEdit : saveSplitTransaction)({
         type, accountId: parseInt(document.getElementById('f-txn-account').value,10),
         date: document.getElementById('f-txn-date').value,
         time: ocTxnTime(),
@@ -3745,6 +3755,7 @@ function confirmClearAutosave() {
    ===================================================================== */
 function bootApp() {
   if (typeof ghsPaintStatus === 'function') setTimeout(ghsPaintStatus, 0);
+  if (typeof ocHashAction === 'function' && ocHashAction()) setTimeout(ocRunHashAction, 60);
   ocCategoryMaintenance();
   if (App.undo && App.undo.forDb !== App.db) undoReset(); else undoPaint();
   document.getElementById('landing').classList.add('hidden');
@@ -5510,7 +5521,7 @@ function tcmRemoveCard(accountId) {
 }
 
 /* ---------- entrada directa: …OWNCOIN.html#tarjetas ---------- */
-function tcmInitialView() { return (location.hash||'').toLowerCase()==='#tarjetas' ? 'tarjetas' : 'dashboard'; }
+function tcmInitialView() { const h = (location.hash||'').toLowerCase(); return h==='#tarjetas' || h==='#cargo' || h==='#abono' ? 'tarjetas' : h==='#nueva' || h==='#gasto' ? 'transacciones' : 'dashboard'; }
 
 /* =====================================================================
    CATEGORÍAS DE LOS CARGOS (v6.3)
@@ -5715,7 +5726,7 @@ function tcmSaveCredit() {
    El mismo JSON sirve para descargarlo como respaldo y para guardarlo en
    un repositorio PRIVADO de GitHub mediante su API de contenidos.
    ===================================================================== */
-const OC_APP_VERSION = '7.5';
+const OC_APP_VERSION = '7.6';
 const BKP_FORMAT = 'owncoin-backup';
 
 /* ---------- JSON <-> base de datos ---------- */
@@ -6491,6 +6502,7 @@ function ocCategoryMaintenance() {
     empties.forEach(e=>{
       ocRemoveCategoryRow(e.id); removed++;
     });
+    if (typeof ocNormalizeSingleSplits === 'function' && ocNormalizeSingleSplits()) scheduleAutosave();
     if (removed) { scheduleAutosave(); setTimeout(()=>showToast(removed===1 ? 'Se eliminó una categoría “(Sin Categoría)” que no tenía movimientos.' : `Se eliminaron ${removed} categorías “(Sin Categoría)” que no tenían movimientos.`, 'success'), 800); }
   } catch (e) { console.warn('Mantenimiento de categorías:', e); }
 }
@@ -7623,6 +7635,100 @@ function tcmCopyMov(id) {
     duplicateTransaction(id);
   }
 }
+
+/* =====================================================================
+   SPLIT COMO UNA SOLA TRANSACCIÓN (v7.6)
+   - En las listas, las partes de un split se muestran juntas en una fila
+     con el total y el detalle de sus categorías.
+   - Al abrirlo se editan todas sus líneas: cambiar, agregar o quitar.
+   ===================================================================== */
+/* Un "split" de una sola parte es una transacción normal (las versiones anteriores marcaban así todo gasto nuevo) */
+function ocNormalizeSingleSplits() {
+  if (!App.db) return 0;
+  const n = dbOne(`SELECT COUNT(*) n FROM (SELECT newSplitTransactionID FROM TRANSACTIONSTABLE WHERE deletedTransaction=6 AND newSplitTransactionID<>0 GROUP BY newSplitTransactionID HAVING COUNT(*)=1)`).n;
+  if (n) App.db.run(`UPDATE TRANSACTIONSTABLE SET newSplitTransactionID=0 WHERE deletedTransaction=6 AND newSplitTransactionID IN
+    (SELECT newSplitTransactionID FROM TRANSACTIONSTABLE WHERE deletedTransaction=6 AND newSplitTransactionID<>0 GROUP BY newSplitTransactionID HAVING COUNT(*)=1)`);
+  return n;
+}
+/* Une las partes de un mismo split que estén en la lista */
+function ocCollapseSplits(txns) {
+  const out = [], seen = {};
+  txns.forEach(t=>{
+    const g = t.newSplitTransactionID;
+    if (!g || t.transactionTypeID === 5) { out.push(t); return; }
+    if (seen[g]) { seen[g].__parts.push(t); return; }
+    const row = Object.assign({}, t, { __parts:[t] });
+    seen[g] = row; out.push(row);
+  });
+  out.forEach(r=>{
+    if (!r.__parts) return;
+    if (r.__parts.length === 1) { r.__splitPartOnly = true; return; }
+    r.amount = r.__parts.reduce((s,p)=>s+p.amount, 0);
+    r.__runId = r.__parts.reduce((m,p)=>Math.max(m, p.transactionsTableID), 0);
+  });
+  return out;
+}
+function ocSplitTotalParts(groupId) {
+  return dbOne(`SELECT COUNT(*) n FROM TRANSACTIONSTABLE WHERE newSplitTransactionID=? AND deletedTransaction=6`, [groupId]).n;
+}
+function ocSplitCatsLine(parts) {
+  return parts.slice().sort((a,b)=>Math.abs(b.amount)-Math.abs(a.amount)).map(p=>{
+    const n = ocSplitCode(p.childCategoryName || '(sin categoría)').name;
+    return `${escapeHtml(n)} ${fmtMoney(Math.abs(p.amount), '')}`;
+  }).join(' · ');
+}
+
+/* Guarda los cambios de un split existente: actualiza las partes que siguen,
+   agrega las nuevas y quita las que se borraron (conservando los datos de tarjeta). */
+function saveSplitEdit(form) {
+  const ctx = window.__txnCtx;
+  const ids = ctx.splitIds.slice();
+  const typeId = form.type === 'gasto' ? TXN_TYPE.GASTO : TXN_TYPE.INGRESO;
+  // una devolución (gasto en positivo) conserva su signo si sigue siendo del mismo tipo
+  const sign = (form.type === 'gasto' ? -1 : 1) * (ctx.keepSign && form.splits.length === 1 && ctx.t && ctx.t.transactionTypeID === typeId ? -1 : 1);
+  const dateStr = dateToDbStr(form.date, form.time);
+  const itemId = form.itemName ? getOrCreateItemId(form.itemName) : (ctx.t ? ctx.t.itemID : 0);
+  const single = form.splits.length === 1;
+  const group = single ? 0 : (ctx.splitGroup || Date.now());
+  App.db.run('BEGIN');
+  try {
+    form.splits.forEach((s, i)=>{
+      const amt = sign * Math.abs(toScaled(s.amount));
+      if (i < ids.length) {
+        App.db.run(`UPDATE TRANSACTIONSTABLE SET amount=?, transactionCurrency=?, date=?, transactionTypeID=?, categoryID=?, accountID=?, accountPairID=0, transferGroupID=0, notes=?, itemID=?, newSplitTransactionID=? WHERE transactionsTableID=?`,
+          [amt, form.currency, dateStr, typeId, Number(s.categoryId), form.accountId, form.notes||'', itemId, group, ids[i]]);
+      } else {
+        insertTransaction({ amount:amt, currency:form.currency, date:dateStr, typeId, categoryId:Number(s.categoryId), accountId:form.accountId, notes:form.notes, splitId:group, itemId });
+      }
+    });
+    ids.slice(form.splits.length).forEach(id=>{
+      App.db.run(`UPDATE TRANSACTIONSTABLE SET deletedTransaction=5 WHERE transactionsTableID=?`, [id]);
+      if (tciTableExists('OC_TC_TXN')) App.db.run(`DELETE FROM OC_TC_TXN WHERE txnId=?`, [id]);
+    });
+    App.db.run('COMMIT');
+  } catch (err) { try { App.db.run('ROLLBACK'); } catch(e) {} throw err; }
+  scheduleAutosave();
+}
+
+/* =====================================================================
+   ACCESOS DIRECTOS (v7.6)
+   El ícono de OWNCOIN (mantener presionado) ofrece: Nueva transacción,
+   Nuevo cargo, Nuevo abono y Tarjetas. Cada uno abre la app con #accion.
+   ===================================================================== */
+function ocHashAction() {
+  return ({ '#nueva':'nueva', '#gasto':'nueva', '#cargo':'cargo', '#abono':'abono' })[(location.hash||'').toLowerCase()] || null;
+}
+function ocRunHashAction() {
+  const a = ocHashAction();
+  if (!a || !App.db || App.securityUnlocked === false) return;
+  try { history.replaceState(null, '', location.pathname + location.search); } catch(e) {}
+  const mr = document.getElementById('modal-root');
+  if (mr.classList.contains('open')) { if (mr.__dirty) { showToast('Termina o cancela la ventana abierta antes de usar el acceso directo.', 'error'); return; } closeModal(); }
+  if (a === 'nueva') { switchView('transacciones'); openTxnModal(null); }
+  else if (a === 'cargo') { switchView('tarjetas'); tcmOpenCharge(null); }
+  else if (a === 'abono') { switchView('tarjetas'); tcmOpenPayment(null); }
+}
+window.addEventListener('hashchange', ()=>{ if (ocHashAction()) ocRunHashAction(); });
 
 main();
 </script>

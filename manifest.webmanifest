@@ -10,11 +10,77 @@
   "background_color": "#0f2038",
   "theme_color": "#0f2038",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "shortcuts": [
-    { "name": "Tarjetas", "short_name": "Tarjetas", "url": "./#tarjetas", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+    {
+      "name": "Nueva transacción",
+      "short_name": "Nueva",
+      "description": "Registrar un gasto, ingreso o transferencia",
+      "url": "./#nueva",
+      "icons": [
+        {
+          "src": "icons/sc-nueva.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Nuevo cargo de tarjeta",
+      "short_name": "Cargo",
+      "description": "Registrar una compra con tarjeta de crédito",
+      "url": "./#cargo",
+      "icons": [
+        {
+          "src": "icons/sc-cargo.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Nuevo abono a tarjeta",
+      "short_name": "Abono",
+      "description": "Registrar un pago a una tarjeta",
+      "url": "./#abono",
+      "icons": [
+        {
+          "src": "icons/sc-abono.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Tarjetas",
+      "short_name": "Tarjetas",
+      "description": "Ver el estado de cuenta de tus tarjetas",
+      "url": "./#tarjetas",
+      "icons": [
+        {
+          "src": "icons/sc-tarjetas.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }
