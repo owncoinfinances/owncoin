@@ -1,45 +1,27 @@
-/* OWNCOIN · service worker
-   - La app (index.html) se pide primero a la red, para recibir siempre la versión más nueva;
-     sin conexión se usa la copia guardada.
-   - Librerías y tipografías se guardan al primer uso y luego se sirven al instante.
-   - Nunca se guarda nada de api.github.com: tus datos no pasan por esta caché. */
-const CACHE = 'owncoin-8.2';
-const CORE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
+/* LEINAF-PRO v2.0 — service worker
+   Guarda una copia de la app en el teléfono para que abra sin señal.
+   Solo almacena los archivos de la app; nunca toca ni envía los datos del inventario. */
+const CACHE = 'leinaf-pro-v2.0.1';
+const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
-self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).then(() => self.skipWaiting()));
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
 });
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim())
-  );
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k.startsWith('leinaf-pro-') && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
-self.addEventListener('fetch', (e) => {
-  const req = e.request;
-  if (req.method !== 'GET') return;
-  const url = new URL(req.url);
-  if (url.hostname === 'api.github.com') return;
-
-  if (req.mode === 'navigate') {
-    e.respondWith(
-      fetch(req).then((res) => {
-        if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put('./index.html', copy)); }
-        return res;
-      }).catch(() => caches.match('./index.html'))
-    );
-    return;
-  }
-  const cacheable = url.origin === self.location.origin ||
-    /(^|\.)cdnjs\.cloudflare\.com$/.test(url.hostname) || /^fonts\.(googleapis|gstatic)\.com$/.test(url.hostname);
-  if (!cacheable) return;
-  e.respondWith(
-    caches.match(req).then((hit) => {
-      const net = fetch(req).then((res) => {
-        if (res.ok || res.type === 'opaque') { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); }
-        return res;
-      }).catch(() => hit);
-      return hit || net;
-    })
-  );
+// Primero la copia guardada (abre al instante y sin señal); si hay señal, se actualiza en segundo plano.
+// Solo la raíz de la app se sirve como index.html; cualquier otra página (por ejemplo una consola) se pide tal cual.
+self.addEventListener('fetch', e => {
+  const req = e.request, url = new URL(req.url);
+  if (req.method !== 'GET' || url.origin !== self.location.origin) return;
+  const scope = new URL(self.registration.scope).pathname;
+  const isApp = url.pathname === scope || url.pathname === scope + 'index.html';
+  if (req.mode === 'navigate' && !isApp) return;
+  e.respondWith(caches.open(CACHE).then(async cache => {
+    const key = isApp ? './index.html' : req;
+    const cached = await cache.match(key, { ignoreSearch: true });
+    const update = fetch(req).then(res => { if (res && res.ok) cache.put(key, res.clone()); return res; }).catch(() => null);
+    return cached || (await update) || new Response('Sin conexión', { status: 503 });
+  }));
 });
